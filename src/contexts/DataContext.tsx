@@ -304,6 +304,10 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     return ebooks;
   };
 
+  const getAllEbooks = () => {
+    return ebooks.flatMap((section: any) => section.books);
+  };
+
   const getVocabs = () => {
     return vocabs;
   };
@@ -325,25 +329,34 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
 
 
   const value: DataContextType = {
+
+    // 유저 정보
     userInfo,
-    myDocs,
-    reviewNotes,
-    diyExams,
-    vocabs,
-    ebooks,
-
     getUserInfo,
-    getMyDocs,
-    getReviewNotes,
-    getDiyExams,
-    getVocabs,
-    getEbooks,
-
     userInfoLoaded,
+
+    // 내 문서
+    myDocs,
+    getMyDocs,
     myDocsLoaded,
+    // 복습 노트
+    reviewNotes,
+    getReviewNotes,
     reviewNotesLoaded,
+    
+    
+    // 시험지
+    diyExams,
+    getDiyExams,
     diyExamsLoaded,
+    // 단어장
+    vocabs,
+    getVocabs,
     vocabsLoaded,
+    // 교재
+    ebooks,
+    getEbooks,
+    getAllEbooks,
     ebooksLoaded,
 
   };
