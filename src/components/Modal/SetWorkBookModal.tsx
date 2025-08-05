@@ -8,9 +8,43 @@ import WarringNoWorkBookAlert from '../Alert/WarringNoWorkBookAlert';
 const SetWorkBookModal: React.FC<{item: any}> = ({item}) => {
   const { popModal, closeModal } = useModal();
   const { openAlert } = useAlert();
+  const [fileStates, setFileStates] = useState<any>({});
+
+
+  
+
   const handleClose = () => {
     popModal();
   };
+
+  // // 파일 업로드
+  // const handleFileUpload = async (type: string, index: number) => {
+  //   const fileKey = `${type}_${index}`;
+  //   // 로딩 시작
+  //   setFileStates(prev => ({ ...prev, [fileKey]: 'loading' }));
+
+  //   try {
+  //     // 1초 후에 실행
+  //     await new Promise(resolve => setTimeout(resolve, 1000));
+
+  //     if(type === 'pdf' || type === 'mp3'){
+  //       setCurrentFileIndex({ type, index });
+  //       await fileSelector.openFileSelector(type, index, bookId);
+  //       return;
+  //     }
+
+  //     // setFileStates(prev => ({ ...prev, [fileKey]: 'success' }));
+  //     // setLastAddedIndex({ type, index });
+      
+  //   } catch (error) {
+  //     console.error('파일 업로드 실패:', error);
+  //     setFileStates(prev => ({ ...prev, [fileKey]: 'upload_error' }));
+  //     setTimeout(() => {
+  //       setFileStates(prev => ({ ...prev, [fileKey]: 'idle' }));
+  //     }, 3000);
+  //   }
+
+  // } 
 
   const handleSave = () => {
     openAlert(WarringNoWorkBookAlert, {
@@ -80,7 +114,9 @@ const SetWorkBookModal: React.FC<{item: any}> = ({item}) => {
 
         <div className="flex gap-[16px] px-[32px]">
           {item.files.pdf.map((file: any, index: number) => (
-          <div key={`pdf-${index}`} className="flex flex-col flex-1 gap-[12px]">
+          <div 
+            onClick={() => handleFileUpload('pdf', index)}
+            key={`pdf-${index}`} className="flex flex-col flex-1 gap-[12px]">
             <h3 className="text-16s text-black">{file.title}</h3>
             <div className="flex flex-col items-center justify-center gap-[12px] flex-1 min-h-[148px] px-[20px] border border-gray-75 rounded-[10px] bg-gray-25 text-16m text-gray-400">
               <IconUpload width={32} height={32} className="text-gray-200" />
@@ -89,7 +125,9 @@ const SetWorkBookModal: React.FC<{item: any}> = ({item}) => {
           </div>
           ))}
           {item.files.audio.map((file: any, index: number) => (
-          <div key={`audio-${index}`} className="flex flex-col flex-1 gap-[16px]">
+          <div 
+            onClick={() => handleFileUpload('audio', index)}
+            key={`audio-${index}`} className="flex flex-col flex-1 gap-[16px]">
             <h3 className="text-16s text-black">{file.title}</h3>
             <div className="flex flex-col items-center justify-center gap-[12px] flex-1 min-h-[148px] px-[20px] border border-gray-75 rounded-[10px] bg-gray-25 text-16m text-gray-400">
               <IconUpload width={32} height={32} className="text-gray-200" />

@@ -1,5 +1,6 @@
 import { refreshAccessToken } from "./loginSession";
-
+import { osGetFileInfo } from "./osFunction";
+// PDF.js는 이제 React 훅에서 사용됩니다.
 // 쿠키 조회
 export function getCookie(name: string): string | null {
   const cookieString = document.cookie;
@@ -81,10 +82,84 @@ export async function fetchDataAsync(url: string, method: string, data: any, for
         return null;
       }
     }else{
-      throw new Error('문제가 발생했습니다.');
+      return response;
     }
   } catch (error) {
     console.error(error);
     throw error;
   }
+}
+
+
+// 앱 내장 저장소 PDF 파일 저장 및 조회
+export const getAppPdfFileData = async ({filePath, fileName}: {filePath: string, fileName: string}) => {
+  const fileInfo = JSON.parse(await osGetFileInfo(filePath));
+  const page_count = fileInfo.total_page;
+  const size = fileInfo.size;
+  const thumbnailPath = filePath.replace(/\.pdf$/, '.png');
+  const { thumbnailBlob, coverImg } = await getAppThumbnailBlobAndUrl(thumbnailPath);
+  return {
+    is_err : false,
+    file: null,
+    file_id : null, 
+    file_nickname : fileName,
+    thumbnail_blob : thumbnailBlob,
+    cover_img : coverImg,
+    total_page : page_count,
+    size : size,
+    user_file_name : fileName,
+    user_file_path : filePath.startsWith('/tmp') ? filePath.replace('/tmp', '/static') : filePath
+  }
+}
+// App 썸네일 이미지 가공
+export async function getAppThumbnailBlobAndUrl(thumbnailPath: string) {
+  return new Promise((resolve, reject) => {
+    const img = document.createElement('img');
+    img.crossOrigin = "anonymous";
+    img.src = `http://localhost:8080${thumbnailPath}`;
+    img.onload = function() {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0);
+      canvas.toBlob(function(thumbnailBlob) {
+        const coverImg = URL.createObjectURL(thumbnailBlob);
+        resolve({ thumbnailBlob, coverImg });
+      }, 'image/png');
+    };
+    img.onerror = function(e) {
+      reject(new Error('이미지 로딩 실패'));
+    };
+  });
+}
+
+
+// base64 URI → Blob 변환
+export const getUriToBlobToFile = (dataURL: string) => {
+  const byteString = atob(dataURL.split(',')[1]);
+  const mimeString = dataURL.split(',')[0].split(':')[1].split(';')[0];
+  const arrayBuffer = new ArrayBuffer(byteString.length);
+  const uint8Array = new Uint8Array(arrayBuffer);
+
+  for (let i = 0; i < byteString.length; i++) {
+    uint8Array[i] = byteString.charCodeAt(i);
+  }
+
+  return new Blob([arrayBuffer], { type: mimeString });
+};
+
+// 앱 내장 저장소 오디오 파일 저장 및 조회
+export const getAppAudioFileData = async ({filePath, fileName}: {filePath: string, fileName: string}) => {
+  const fileInfo = JSON.parse(await osGetFileInfo(filePath));
+  const totalTime = fileInfo.total_time;
+  return {
+    is_err : false,
+    file : null,
+    file_id : null,
+    file_nickname : fileName,
+    user_file_name : fileName,
+    user_file_path : filePath.startsWith('/tmp') ? filePath.replace('/tmp', '/static') : filePath,
+    total_time : totalTime,
+  } 
 }
