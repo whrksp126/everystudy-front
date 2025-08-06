@@ -162,8 +162,19 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
               releaseDate: new Date(2024, 11, 1),
               image: 'https://image.yes24.com/goods/140199667/XL',
               files : {
-                pdf : [{title: '문제집 파일'},{title: '해설 파일'}],
-                audio : [{title: '음성 파일'}],
+                pdfs : [
+                  {
+                    title: '문제집 파일',
+                  },
+                  {
+                    title: '해설 파일',
+                  }
+                ],
+                mp3s : [
+                  {
+                    title: '음성 파일'
+                  }
+                ],
               }
             },
             {
@@ -175,8 +186,8 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
               releaseDate: new Date(2024, 11, 1),
               image: 'https://image.yes24.com/goods/137485546/XL',
               files : {
-                pdf : [{title: '문제집 파일'},{title: '해설 파일'}],
-                audio : [{title: '음성 파일'}],
+                pdfs : [{title: '문제집 파일'},{title: '해설 파일'}],
+                mp3s : [{title: '음성 파일'}],
               }
             },
             {
@@ -188,8 +199,8 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
               releaseDate: new Date(2024, 11, 1),
               image: 'https://image.yes24.com/goods/138000000/XL',
               files : {
-                pdf : [{title: '문제집 파일'},{title: '해설 파일'}],
-                audio : [{title: '음성 파일'}],
+                pdfs : [{title: '문제집 파일'},{title: '해설 파일'}],
+                mp3s : [{title: '음성 파일'}],
               }
             },
           ],
@@ -207,8 +218,8 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
               image: 'https://image.yes24.com/goods/139000000/XL',
               releaseDate: new Date(2024, 11, 1),
               files : {
-                pdf : [{title: '문제집 파일'},{title: '해설 파일'}],
-                audio : [{title: '음성 파일'}],
+                pdfs : [{title: '문제집 파일'},{title: '해설 파일'}],
+                mp3s : [{title: '음성 파일'}],
               }
             },
             {
@@ -220,8 +231,8 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
               image: 'https://image.yes24.com/goods/140000000/XL',
               releaseDate: new Date(2024, 11, 5),
               files : {
-                pdf : [{title: '문제집 파일'},{title: '해설 파일'}],
-                audio : [{title: '음성 파일'}],
+                pdfs : [{title: '문제집 파일'},{title: '해설 파일'}],
+                mp3s : [{title: '음성 파일'}],
               }
             },
             {
@@ -233,8 +244,8 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
               image: 'https://image.yes24.com/goods/141000000/XL',
               releaseDate: new Date(2024, 11, 10),
               files : {
-                pdf : [{title: '문제집 파일'},{title: '해설 파일'}],
-                audio : [{title: '음성 파일'}],
+                pdfs : [{title: '문제집 파일'},{title: '해설 파일'}],
+                mp3s : [{title: '음성 파일'}],
               }
             },
           ],

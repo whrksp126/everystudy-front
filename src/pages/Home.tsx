@@ -6,6 +6,7 @@ import { useOverflowMenu } from '../contexts/OverflowMenuContext';
 import { useModal } from '../hooks/useModal'
 import BookSearchModal from '../components/Modal/BookSearchModal';
 import { useData } from '../contexts/DataContext';
+import SetFolderModal from '../components/Modal/SetFolderModal';
 
 import { 
   IconPlus, 
@@ -100,6 +101,13 @@ const Home: React.FC = () => {
       keepInDOM: true 
     });
   };
+
+  const handleFolderRegistration = () => {
+    openModal(SetFolderModal, {}, { 
+      preserveState: true, 
+      keepInDOM: true 
+    });
+  }
 
   // 드롭다운 외부 클릭 시 닫기
   useEffect(() => {
@@ -229,11 +237,17 @@ const Home: React.FC = () => {
           <div className="flex items-center gap-[20px]">
             <h2 className="text-20b text-black">내 교재</h2>
             <div className="flex items-center gap-[12px]">
-              <button className="flex items-center gap-[6px] h-[40px] px-[14px] rounded-[6px] bg-gray-50">
+              <button 
+                onClick={handleBookRegistration}
+                className="flex items-center gap-[6px] h-[40px] px-[14px] rounded-[6px] bg-gray-50"
+              >
                 <IconPlus width="16" height="16" className="text-gray-300" />
                 <span className="text-14m text-gray-500">새 교재</span>
               </button>
-              <button className="flex items-center gap-[6px] h-[40px] px-[14px] rounded-[6px] bg-gray-50">
+              <button 
+                onClick={handleFolderRegistration}
+                className="flex items-center gap-[6px] h-[40px] px-[14px] rounded-[6px] bg-gray-50"
+              >
                 <IconPlus width="16" height="16" className="text-gray-300" />
                 <span className="text-14m text-gray-500">새 폴더</span>
               </button>

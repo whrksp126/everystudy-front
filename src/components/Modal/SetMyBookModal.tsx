@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useModal } from '../../hooks/useModal';
-import { IconArrowLeft, IconUpload, IconNotification, IconPlusSquare, IconCheck } from '../../assets/Icon';
+import { IconArrowLeft, IconUpload, IconNotification, IconPlusSquare, IconCheck, IconX } from '../../assets/Icon';
 import { osDeleteTempAll } from '../../utils/osFunction';
 import { useFileSelector } from '../../hooks/useFileSelector';
 import { FileSelectorModal } from '../FileSelectorModal';
@@ -203,7 +203,24 @@ const SetMyBookModal: React.FC<SetMyBookModalProps> = () => {
     // }
   }
 
+  // 상태 초기화 함수(현재 업로드 중인 파일만 idle로)
+  const resetFileUploadStates = () => {
+    if (!currentFileIndex) return;
+    const { type, index } = currentFileIndex;
+    setFileStates(prev => ({
+      ...prev,
+      [`${type}_${index}`]: files[type + 's'] && files[type + 's'][index] ? 'success' : 'idle'
+    }));
+    setCurrentFileIndex(null);
+  };
 
+  // 파일 삭제
+  const handleFileDelete = (type: string, index: number) => {
+    setFiles(prev => ({
+      ...prev,
+      [type + 's']: prev[type + 's'].filter((_, i) => i !== index)
+    }));
+  };
 
   return (
     <div 
@@ -311,7 +328,13 @@ const SetMyBookModal: React.FC<SetMyBookModalProps> = () => {
                     ) : (
                       <>
                         <IconCheck width={24} height={24} className="text-primary-blue" />
-                        <span className="text-14r text-primary-blue">{file.name}</span>
+                        <span className="flex-1 text-14r text-primary-blue">{file.name}</span>
+                        <button onClick={(e) => {
+                          e.stopPropagation();
+                          handleFileDelete('pdf', index);
+                        }}>
+                          <IconX width={24} height={24} className="text-gray-600" />
+                        </button>
                       </>
                     )}
                   </div>
@@ -415,7 +438,13 @@ const SetMyBookModal: React.FC<SetMyBookModalProps> = () => {
                     ) : (
                       <>
                         <IconCheck width={24} height={24} className="text-primary-blue" />
-                        <span className="text-14r text-primary-blue">{file.name}</span>
+                        <span className="flex-1 text-14r text-primary-blue">{file.name}</span>
+                        <button onClick={(e) => {
+                          e.stopPropagation();
+                          handleFileDelete('mp3', index);
+                        }}>
+                          <IconX width={24} height={24} className="text-gray-600" />
+                        </button>
                       </>
                     )}
                   </div>
@@ -475,7 +504,10 @@ const SetMyBookModal: React.FC<SetMyBookModalProps> = () => {
       <FileSelectorModal
         isOpen={fileSelector.isOpen}
         labelText="파일을 선택해주세요"
-        onClose={fileSelector.closeFileSelector}
+        onClose={() => {
+          fileSelector.closeFileSelector();
+          resetFileUploadStates();
+        }}
         onFileSelect={(file) => fileSelector.handleFileSelect(file, currentFileIndex?.type || 'pdf')}
         accept={currentFileIndex?.type === 'mp3' ? "audio/*" : "application/pdf"}
       />
