@@ -5,6 +5,7 @@ import { useAlert } from '../../hooks/useAlert';
 import WarringNoWorkBookAlert from '../Alert/WarringNoWorkBookAlert';
 import { useFileSelector } from '../../hooks/useFileSelector';
 import { FileSelectorModal } from '../FileSelectorModal';
+import { saveWorkBookPathfetch } from '../../api/workbook';
 
 const SetWorkBookModal: React.FC<{item: any}> = ({item}) => {
   const { popModal, closeModal } = useModal();
@@ -103,11 +104,13 @@ const SetWorkBookModal: React.FC<{item: any}> = ({item}) => {
   };
 
 
-  const handleSave = () => {
-    openAlert(WarringNoWorkBookAlert, {
-      preserveState: true, 
-      keepInDOM: true 
-    });
+  const handleSave = async () => {
+    console.log(files);
+    await saveWorkBookPathfetch(workBook, files);
+    // openAlert(WarringNoWorkBookAlert, {
+    //   preserveState: true, 
+    //   keepInDOM: true 
+    // });
   };
 
   // 상태 초기화 함수(현재 업로드 중인 파일만 idle로)

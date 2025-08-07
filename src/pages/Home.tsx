@@ -172,7 +172,13 @@ const Home: React.FC = () => {
               key={book.id}
               className="flex flex-col gap-[12px] justify-end h-[248px] p-[10px] border border-gray-75 rounded-[8px]"
             >
-              <img src={book.image} alt="교재 이미지" />
+              <div className="flex items-center justify-center w-full h-[180px]">
+                <img
+                  src={book.image}
+                  alt="교재 이미지"
+                  className="max-w-full max-h-full w-[100%] h-[100%] object-contain"
+                />
+              </div>
               <h3 className="h-[36px] text-13m text-gray-800 line-clamp-2">{book.title}</h3>
             </div>
           ))}
@@ -194,7 +200,13 @@ const Home: React.FC = () => {
           <div className="flex gap-[12px]">
             {reviewNotes.map((item) => (
             <div key={item.id} className="flex flex-1 flex-col gap-[12px] justify-end h-[248px] p-[10px] border border-gray-75 rounded-[8px]">
-              <img src={item.image} alt="교재 이미지" />
+              <div className="flex items-center justify-center w-full h-[180px]">
+                <img
+                  src={item.image}
+                  alt="교재 이미지"
+                  className="max-w-full max-h-full w-[100%] h-[100%] object-contain"
+                />
+              </div>
               <h3 className="h-[36px] text-13m text-gray-800 line-clamp-2">{item.title}</h3>
             </div>
             ))}
@@ -315,11 +327,15 @@ const Home: React.FC = () => {
         <div className="flex flex-wrap gap-[20px]">
           {myDocs.map((item) => (
             <div key={item.id} className="flex flex-col gap-[12px] w-[160px] h-[264px] border border-gray-75 rounded-[8px] p-[10px] bg-gray-25">
-              <div className="flex items-center justify-center w-full h-[180px]">
+              <div className="flex items-center justify-center w-full h-[180px] bg-gray-50">
                 {item.isFolder ? (
                   <item.folderIcon width="120" height="100" className="text-gray-200" />
                 ) : (
-                  <img src={item.image || ''} alt="교재 이미지" />
+                  <img 
+                    src={item.image || ''} 
+                    alt="교재 이미지"                   
+                    className="max-w-full max-h-full w-[100%] h-[100%] object-contain"
+                  />
                 )}
               </div>
               <div className="flex items-center justify-between">

@@ -164,14 +164,17 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
               files : {
                 pdfs : [
                   {
+                    id: 'pdf id 1',
                     title: '문제집 파일',
                   },
                   {
+                    id: 'pdf id 2',
                     title: '해설 파일',
                   }
                 ],
                 mp3s : [
                   {
+                    id: 'mp3 id 1',
                     title: '음성 파일'
                   }
                 ],

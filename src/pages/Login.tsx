@@ -10,11 +10,12 @@ const Login: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true); 
+    setIsLoading(true);
+    console.log(email, password);
     const result = await loginFetch(email, password);
     if(result === null) return;
     if(result.code == 200){
-      navigate('/customExam');
+      navigate('/home');
     }else{
       alert(result.msg)
     }

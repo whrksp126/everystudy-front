@@ -9,13 +9,14 @@ export const loginFetch = async (email: string, password: string): Promise<any> 
     email: email,
     userpw: password,
   };
+  console.log(url)
   try{
-  const response = await fetch(url, {
-    method: method,
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(fetchData),
+    const response = await fetch(url, {
+      method: method,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(fetchData),
     });
     const data = await response.json();
     if(data.code == 200){
