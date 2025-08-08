@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { loginFetch } from '../api/login';
 
 const Login: React.FC = () => {
-  const [email, setEmail] = useState('nana5@test.com');
-  const [password, setPassword] = useState('nana5!@34');
+  const [email, setEmail] = useState('ui_test@test.com');
+  const [password, setPassword] = useState('test!@34');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
