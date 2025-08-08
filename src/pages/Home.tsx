@@ -1,13 +1,13 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import EveryStudyLogo from '../assets/EveryStudyLogo.png';
 import MyBookOverflowMenu from '../components/MyBookOverflowMenu';
-import OverflowMenu from '../components/OverflowMenu/OverflowMenu.js';
+import OverflowMenu from '../components/OverflowMenu/OverflowMenu';
 import { useOverflowMenu } from '../contexts/OverflowMenuContext';
 import { useModal } from '../hooks/useModal'
 import BookSearchModal from '../components/Modal/BookSearchModal';
 import { useData } from '../contexts/DataContext';
 import SetFolderModal from '../components/Modal/SetFolderModal';
-
+import {getFolderSvg} from '../utils/folderSvg';
 import { 
   IconPlus, 
   IconProfile, 
@@ -20,7 +20,7 @@ import {
   IconChevronUp, 
   IconChevronDown, 
   IconKebab,
-} from '../assets/Icon.jsx';
+} from '../assets/Icon.tsx';
 
 const sortOptions = [
   '최근 등록순',
@@ -40,10 +40,13 @@ const Home: React.FC = () => {
   const [recentStudyBooks, setRecentStudyBooks] = useState<any[]>([]);
   const [reviewNotes, setReviewNotes] = useState<any[]>([]);
   const [vocabs, setVocabs] = useState<any[]>([]);
-  const [myDocs, setMyDocs] = useState<any[]>([]);
+
+  const [viewMyDocs, setViewMyDocs] = useState<any[]>([]);
+  const [folderPath, setFolderPath] = useState<string[]>([]);
+
 
   const { 
-    myDocsLoaded, getMyDocs,
+    myDocsLoaded, getMyDocs, myDocs,
     vocabsLoaded, getVocabs,
     reviewNotesLoaded, getReviewNotes,
   } = useData();
@@ -51,25 +54,39 @@ const Home: React.FC = () => {
 
   useEffect(() => {
     if(myDocsLoaded && reviewNotesLoaded && vocabsLoaded ){
-
-      const myDocsData = getMyDocs();
-      const sortedMyDocs = sortMyDocs(selectedSort, myDocsData);
-      setMyDocs(sortedMyDocs || []);
-      setRecentStudyBooks(filterRecentLearningDocs(myDocsData));
+      myDocsCallback();
       setVocabs(getVocabs());
       setReviewNotes(getReviewNotes());
     }
   }, [myDocsLoaded, reviewNotesLoaded, vocabsLoaded]);
 
+
+  useEffect(()=>{
+    if(myDocsLoaded && reviewNotesLoaded && vocabsLoaded ){
+      myDocsCallback();
+    }
+  },[myDocs])
+
+
+  const myDocsCallback = ()=>{
+    console.log('myDocsCallback');
+    const myDocs = getMyDocs();
+    const sortedMyDocs = sortMyDocs(myDocs);
+    setViewMyDocs(sortedMyDocs || []);
+    setRecentStudyBooks(filterRecentLearningDocs(myDocs));
+  }
+  
+
   // 최근 공부한 교재 필터링
   const filterRecentLearningDocs = (myDocs) => {
     return myDocs
-      .filter(doc => !doc.isFolder) 
+      .filter(doc => doc.type !== 'folder') 
       .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
   };
 
   // 내 교재 정렬
-  const sortMyDocs = (option: string, sortItems: any[]) => {
+  const sortMyDocs = (sortItems: any[]) => {
+    const option = selectedSort || '최근 등록순';
     if(option === '최근 등록순'){
       return sortItems
         .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
@@ -85,14 +102,13 @@ const Home: React.FC = () => {
   const handleSortChange = (option: string) => {
     setSelectedSort(option);
     setIsDropdownOpen(false);
-
-    const sortedMyDocs = sortMyDocs(option, myDocs);
-    setMyDocs(sortedMyDocs || []);
+    const sortedMyDocs = sortMyDocs(getMyDocs());
+    setViewMyDocs(sortedMyDocs || []);
   };
 
-  const handleMoreOptionsClick = (event: React.MouseEvent) => {
+  const handleMoreOptionsClick = (event: React.MouseEvent, item: any) => {
     event.stopPropagation();
-    openOverflowMenu(event.currentTarget as HTMLElement, <MyBookOverflowMenu />);
+    openOverflowMenu(event.currentTarget as HTMLElement, <MyBookOverflowMenu item={item} />);
   };
 
   const handleBookRegistration = () => {
@@ -103,7 +119,7 @@ const Home: React.FC = () => {
   };
 
   const handleFolderRegistration = () => {
-    openModal(SetFolderModal, {}, { 
+    openModal(SetFolderModal, { type: 'add', folderPath: folderPath }, { 
       preserveState: true, 
       keepInDOM: true 
     });
@@ -166,23 +182,30 @@ const Home: React.FC = () => {
             <div></div>
           </div>
           {/* 컨텐츠 */}
-          <div className="flex gap-[12px]">
-          {recentStudyBooks.slice(0, 2).map((book) => (
-            <div
-              key={book.id}
-              className="flex flex-col gap-[12px] justify-end h-[248px] p-[10px] border border-gray-75 rounded-[8px]"
-            >
-              <div className="flex items-center justify-center w-full h-[180px]">
-                <img
-                  src={book.image}
-                  alt="교재 이미지"
-                  className="max-w-full max-h-full w-[100%] h-[100%] object-contain"
-                />
-              </div>
-              <h3 className="h-[36px] text-13m text-gray-800 line-clamp-2">{book.title}</h3>
+          {recentStudyBooks.length === 0 ? (
+            <div className="flex items-center justify-center flex-1 h-[248px] p-[12px] rounded-[12px] bg-gray-25">
+              <span className="text-18m text-gray-400 text-center">최근 공부한 교재가 없습니다.</span>
             </div>
-          ))}
-          </div>
+          ) : (
+            <div className="flex gap-[12px]">
+            {recentStudyBooks.slice(0, 2).map((book) => (
+              <div
+                key={book.id}
+                className="flex flex-col gap-[12px] justify-end h-[248px] p-[10px] border border-gray-75 rounded-[8px]"
+              >
+                <div className="flex items-center justify-center w-full h-[180px]">
+                  <img
+                    src={book.image}
+                    alt="교재 이미지"
+                    className="max-w-full max-h-full w-[100%] h-[100%] object-contain"
+                  />
+                </div>
+                <h3 className="h-[36px] text-13m text-gray-800 line-clamp-2">{book.title}</h3>
+              </div>
+            ))}
+            </div>  
+          )}
+          
         </div>
         {/* 복습 */}
         <div className="flex flex-1 flex-col gap-[12px] h-[324px] px-[24px] py-[20px] rounded-[10px] bg-white">
@@ -197,20 +220,29 @@ const Home: React.FC = () => {
             </div>
           </div>
           {/* 컨텐츠 */}
-          <div className="flex gap-[12px]">
-            {reviewNotes.map((item) => (
-            <div key={item.id} className="flex flex-1 flex-col gap-[12px] justify-end h-[248px] p-[10px] border border-gray-75 rounded-[8px]">
-              <div className="flex items-center justify-center w-full h-[180px]">
-                <img
-                  src={item.image}
-                  alt="교재 이미지"
-                  className="max-w-full max-h-full w-[100%] h-[100%] object-contain"
-                />
-              </div>
-              <h3 className="h-[36px] text-13m text-gray-800 line-clamp-2">{item.title}</h3>
+          {reviewNotes.length === 0 ? (
+            <div className="flex items-center justify-center flex-1 h-[248px] p-[12px] rounded-[12px] bg-gray-25">
+              <span className="text-18m text-gray-400 text-center">오답노트가 없습니다</span>
             </div>
-            ))}
-          </div>
+          ) : (
+            <div className="flex gap-[12px]">
+              {reviewNotes.map((item) => (
+              <div key={item.id} className="flex flex-1 flex-col gap-[12px] justify-end h-[248px] p-[10px] border border-gray-75 rounded-[8px]">
+                <div className="flex items-center justify-center w-full h-[180px]">
+                  <img
+                    src={item.image}
+                    alt="교재 이미지"
+                    className="max-w-full max-h-full w-[100%] h-[100%] object-contain"
+                  />
+                </div>
+                <h3 className="h-[36px] text-13m text-gray-800 line-clamp-2">{item.title}</h3>
+              </div>
+              ))}
+            </div>
+            
+          )}
+
+
         </div>
         {/* 단어장 */}
         <div className="flex flex-col gap-[12px] h-[324px] px-[24px] py-[20px] rounded-[10px] bg-white">
@@ -225,20 +257,26 @@ const Home: React.FC = () => {
             </div>
           </div>
           {/* 컨텐츠 */}
-          <div className="flex flex-col gap-[8px]">
-            {vocabs.map((item) => (
-              <div key={item.id} className="flex justify-between items-center px-[12px] py-[14px] rounded-[12px] bg-gray-25">
-                <div className="flex flex-col gap-[8px]">
-                  <span className="text-13m text-gray-800">{item.title}</span>
-                  <div className="">
-                    <span className="mr-[8px] text-16b text-gray-800">{item.englishWord}</span>
-                    <span className="text-16b text-gray-200">{item.koreanWord}</span>
+          {vocabs.length === 0 ? (
+            <div className="flex items-center justify-center flex-1 h-[248px] p-[12px] rounded-[12px] bg-gray-25">
+              <span className="text-18m text-gray-400 text-center">단어장이 없습니다</span>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-[8px]">
+              {vocabs.map((item) => (
+                <div key={item.id} className="flex justify-between items-center px-[12px] py-[14px] rounded-[12px] bg-gray-25">
+                  <div className="flex flex-col gap-[8px]">
+                    <span className="text-13m text-gray-800">{item.title}</span>
+                    <div className="">
+                      <span className="mr-[8px] text-16b text-gray-800">{item.englishWord}</span>
+                      <span className="text-16b text-gray-200">{item.koreanWord}</span>
+                    </div>
                   </div>
+                  <div className="px-[8px] py-[3px] rounded-[6px] bg-gray-50 px-[12px] py-[6px] text-12r text-gray-600">단어 <strong className="text-primary-purple">{item.wordCount}</strong>개</div>
                 </div>
-                <div className="px-[8px] py-[3px] rounded-[6px] bg-gray-50 px-[12px] py-[6px] text-12r text-gray-600">단어 <strong className="text-primary-purple">{item.wordCount}</strong>개</div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>  
+          )}
         </div>
       </div>
 
@@ -325,11 +363,11 @@ const Home: React.FC = () => {
         {/* 컨텐츠 */}
         {viewMode === 'category' ? (
         <div className="flex flex-wrap gap-[20px]">
-          {myDocs.map((item) => (
+          {viewMyDocs && viewMyDocs.length > 0 && viewMyDocs.map((item) => (
             <div key={item.id} className="flex flex-col gap-[12px] w-[160px] h-[264px] border border-gray-75 rounded-[8px] p-[10px] bg-gray-25">
-              <div className="flex items-center justify-center w-full h-[180px] bg-gray-50">
-                {item.isFolder ? (
-                  <item.folderIcon width="120" height="100" className="text-gray-200" />
+              <div className="flex items-center justify-center w-full h-[180px]">
+                {item.type === 'folder' ? (
+                  getFolderSvg({ width: '120', height: '100', color: item.color })
                 ) : (
                   <img 
                     src={item.image || ''} 
@@ -339,8 +377,8 @@ const Home: React.FC = () => {
                 )}
               </div>
               <div className="flex items-center justify-between">
-                <h3 className="text-13m text-gray-800 line-clamp-2">{item.title}</h3>
-                <button onClick={handleMoreOptionsClick}>
+                <h3 className="text-13m text-gray-800 line-clamp-2">{item.name}</h3>
+                <button onClick={(event) => handleMoreOptionsClick(event, item)}>
                   <IconKebab width="24" height="24" className="text-gray-200" />
                 </button>
               </div>
@@ -349,18 +387,18 @@ const Home: React.FC = () => {
         </div>
         ) : (
         <div className="flex flex-col gap-[16px]">
-        {myDocs.map((item) => (
+        {viewMyDocs && viewMyDocs.length > 0 && viewMyDocs.map((item) => (
           <div key={item.id} className="flex gap-[12px] h-[100px] border border-gray-75 rounded-[8px] p-[10px] bg-gray-25">
             <div className="flex items-center justify-center w-[62px] h-[80px]">
-              {item.isFolder ? (
-                <item.folderIcon width="42" height="35" className="text-gray-200" />
+              {item.type === 'folder'  ? (
+                getFolderSvg({width: '42', height: '35', color: item.color})
               ) : (
                 <img src={item.image || ''} alt="교재 이미지" />
               )}
             </div>
             <div className="flex items-center justify-between flex-1">
-              <h3 className="text-13m text-gray-800 line-clamp-2">{item.title}</h3>
-              <button onClick={handleMoreOptionsClick}>
+              <h3 className="text-13m text-gray-800 line-clamp-2">{item.name}</h3>
+              <button onClick={(event) => handleMoreOptionsClick(event, item)}>
                 <IconKebab width="24" height="24" className="text-gray-200" />
               </button>
             </div>

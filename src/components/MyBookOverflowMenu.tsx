@@ -1,5 +1,5 @@
 import React from 'react';
-import { IconEdit, IconDelete, IconArrowRightSquare } from '../assets/Icon.jsx';
+import { IconEdit, IconDelete, IconArrowRightSquare } from '../assets/Icon.tsx';
 import { useOverflowMenu } from '../contexts/OverflowMenuContext';
 import { useModalContext } from '../contexts/ModalContext';
 import SetFolderModal from './Modal/SetFolderModal';
@@ -15,14 +15,14 @@ interface MenuItem {
   isDivider?: boolean;
 }
 
-const MyBookOverflowMenu: React.FC = () => {
+const MyBookOverflowMenu: React.FC<{ item: any }> = ({ item }) => {
   const { closeOverflowMenu } = useOverflowMenu();
   const { pushModal } = useModalContext();
 
   const handleEdit = () => {
     console.log('편집 클릭');
     closeOverflowMenu();
-    pushModal(SetFolderModal, {}, { 
+    pushModal(SetFolderModal, {type: 'edit', item: item}, { 
       preserveState: true, 
       keepInDOM: true 
     });

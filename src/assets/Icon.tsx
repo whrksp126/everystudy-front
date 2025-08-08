@@ -1,6 +1,12 @@
 
+type IconProps = {
+  width?: number | string;
+  height?: number | string;
+  className?: string;
+};
 
-export function IconProfile({ width, height, className }) {
+
+export function IconProfile({ width, height, className }: IconProps) {
   return (
     <svg 
       xmlns="http://www.w3.org/2000/svg" 
@@ -23,7 +29,7 @@ export function IconProfile({ width, height, className }) {
   );
 }
 
-export function IconPlus({ width, height, className }) {
+export function IconPlus({ width, height, className }: IconProps) {
   return (
     <svg 
       xmlns="http://www.w3.org/2000/svg" 
@@ -46,7 +52,7 @@ export function IconPlus({ width, height, className }) {
 }
 
 
-export function IconTimeCircle({ width, height, className }) {
+export function IconTimeCircle({ width, height, className }: IconProps) {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox="0 0 24 24" fill="none" className={className}>
       <path d="M20.5 12.001C20.5 7.30619 16.6948 3.50098 12 3.50098C7.30521 3.50098 3.5 7.30619 3.5 12.001C3.5 16.6958 7.30521 20.501 12 20.501C16.6948 20.501 20.5 16.6958 20.5 12.001ZM22 12.001C22 17.5242 17.5232 22.001 12 22.001C6.47679 22.001 2 17.5242 2 12.001C2 6.47776 6.47679 2.00098 12 2.00098C17.5232 2.00098 22 6.47776 22 12.001Z" fill="currentColor"/>
@@ -56,7 +62,7 @@ export function IconTimeCircle({ width, height, className }) {
 } 
 
 
-export function IconEditSquare({ width, height, className }) {
+export function IconEditSquare({ width, height, className }: IconProps) {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox="0 0 24 24" fill="none" className={className}>
       <path d="M2 16.3623V8.04785C2.00004 6.35125 2.53255 4.84235 3.5498 3.75098C4.57253 2.65389 6.02984 2.03908 7.75293 2.03906H11.4922L11.5684 2.04297C11.9467 2.08123 12.2422 2.40063 12.2422 2.78906C12.2422 3.1775 11.9467 3.49689 11.5684 3.53516L11.4922 3.53906H7.75293C6.40129 3.53908 5.35744 4.01276 4.64746 4.77441C3.93205 5.54195 3.50004 6.66264 3.5 8.04785V16.3623C3.50005 17.7484 3.92949 18.8696 4.64355 19.6367C5.352 20.3978 6.39627 20.8711 7.75293 20.8711H16.5771C17.9341 20.8711 18.978 20.3975 19.6865 19.6367C20.4007 18.8696 20.831 17.7484 20.8311 16.3623V12.334C20.8311 11.9198 21.1669 11.584 21.5811 11.584C21.9952 11.584 22.331 11.9198 22.3311 12.334V16.3623C22.331 18.0578 21.8015 19.5664 20.7852 20.6582C19.763 21.7561 18.3048 22.3711 16.5771 22.3711H7.75293C6.02567 22.3711 4.56792 21.7561 3.5459 20.6582C2.52964 19.5664 2.00005 18.0579 2 16.3623Z" fill="currentColor"/>
@@ -66,7 +72,7 @@ export function IconEditSquare({ width, height, className }) {
   )
 } 
 
-export function IconDocument({ width, height, className }) {
+export function IconDocument({ width, height, className }: IconProps) {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox="0 0 24 24" fill="none" className={className}>
       <path d="M15.7158 15.4736C16.13 15.4736 16.4658 15.8094 16.4658 16.2236C16.4658 16.6378 16.13 16.9736 15.7158 16.9736H8.49609C8.08188 16.9736 7.74609 16.6378 7.74609 16.2236C7.74609 15.8094 8.08188 15.4736 8.49609 15.4736H15.7158Z" fill="currentColor"/>
@@ -77,7 +83,7 @@ export function IconDocument({ width, height, className }) {
   )
 } 
 
-export function IconArrowRight4({ width, height, className }) {
+export function IconArrowRight4({ width, height, className }: IconProps) {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox="0 0 24 24" fill="none" className={className}>
       <path d="M7.96967 5.53033C7.67678 5.23744 7.67678 4.76268 7.96967 4.46978C8.26256 4.17689 8.73732 4.17689 9.03022 4.46978L16.0302 11.4698C16.3231 11.7627 16.3231 12.2374 16.0302 12.5303L9.03022 19.5303C8.73732 19.8232 8.26256 19.8232 7.96967 19.5303C7.67678 19.2374 7.67678 18.7627 7.96967 18.4698L14.4394 12.0001L7.96967 5.53033Z" fill="currentColor"/>
@@ -86,7 +92,7 @@ export function IconArrowRight4({ width, height, className }) {
 } 
 
 
-export function IconCategory({ width, height, className }) {
+export function IconCategory({ width, height, className }: IconProps) {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox="0 0 24 24" fill="none" className={className}>
       <path d="M9.25 6.5C9.25 5.82981 9.24705 5.3343 9.19727 4.93945C9.14823 4.55045 9.06286 4.35423 8.96778 4.23633C8.88106 4.1289 8.71828 4.00282 8.32911 3.90527C7.92777 3.8047 7.34771 3.75 6.5 3.75C5.6523 3.75 5.07224 3.8047 4.6709 3.90527C4.28173 4.00282 4.11895 4.1289 4.03223 4.23633C3.93715 4.35423 3.85178 4.55045 3.80274 4.93945C3.75296 5.3343 3.75 5.82981 3.75 6.5C3.75 7.1728 3.75052 7.66853 3.79786 8.06543C3.84448 8.45628 3.92729 8.65082 4.01954 8.7666C4.10285 8.87106 4.26225 8.99704 4.65333 9.09473C5.05654 9.19541 5.64186 9.25 6.5 9.25C7.35815 9.25 7.94347 9.19541 8.34668 9.09473C8.73776 8.99704 8.89716 8.87106 8.98047 8.7666C9.07272 8.65082 9.15553 8.45628 9.20215 8.06543C9.24949 7.66853 9.25 7.1728 9.25 6.5ZM10.75 6.5C10.75 7.13973 10.7517 7.73773 10.6914 8.24316C10.6304 8.75438 10.4971 9.27108 10.1533 9.70215C9.80057 10.1445 9.30405 10.4014 8.70997 10.5498C8.12777 10.6952 7.3974 10.75 6.5 10.75C5.60261 10.75 4.87224 10.6952 4.29004 10.5498C3.69596 10.4014 3.19944 10.1445 2.84668 9.70215C2.50295 9.27108 2.36958 8.75438 2.3086 8.24316C2.24831 7.73773 2.25 7.13973 2.25 6.5C2.25 5.85767 2.25049 5.25943 2.31446 4.75195C2.37917 4.23864 2.5184 3.72384 2.86426 3.29492C3.21852 2.85565 3.71353 2.59867 4.30567 2.4502C4.88607 2.30473 5.61184 2.25 6.5 2.25C7.38817 2.25 8.11394 2.30473 8.69434 2.4502C9.28648 2.59867 9.78149 2.85565 10.1357 3.29492C10.4816 3.72384 10.6208 4.23864 10.6856 4.75195C10.7495 5.25943 10.75 5.85767 10.75 6.5Z" fill="currentColor"/>
@@ -98,7 +104,7 @@ export function IconCategory({ width, height, className }) {
 } 
 
 
-export function IconList({ width, height, className }) {
+export function IconList({ width, height, className }: IconProps    ) {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox="0 0 24 24" fill="none" className={className}>
       <path d="M19.5 18.5H4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
@@ -109,7 +115,7 @@ export function IconList({ width, height, className }) {
 } 
 
 
-export function IconChevronUp({ width, height, className }) {
+export function IconChevronUp({ width, height, className }: IconProps) {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox="0 0 16 16" fill="none" className={className}>
       <path fillRule="evenodd" clipRule="evenodd" d="M2.06055 10.0901L8.00025 4.15039L13.9399 10.0901L13.0914 10.9386L8.00025 5.84745L2.90907 10.9386L2.06055 10.0901Z" fill="currentColor"/>
@@ -117,7 +123,7 @@ export function IconChevronUp({ width, height, className }) {
   )
 } 
 
-export function IconChevronDown({ width, height, className }) {
+export function IconChevronDown({ width, height, className }: IconProps) {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox="0 0 16 16" fill="none" className={className}>
       <path fillRule="evenodd" clipRule="evenodd" d="M13.9397 5.91103L8 11.8507L2.0603 5.91103L2.90883 5.0625L8 10.1537L13.0912 5.0625L13.9397 5.91103Z" fill="currentColor"/>
@@ -126,7 +132,7 @@ export function IconChevronDown({ width, height, className }) {
 } 
 
 
-export function IconKebab({ width, height, className }) {
+export function IconKebab({ width, height, className }: IconProps) {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox="0 0 24 24" fill="none" className={className}>
       <rect x="10.5996" y="5" width="2.8" height="2.8" rx="1.4" fill="currentColor"/>
@@ -139,7 +145,7 @@ export function IconKebab({ width, height, className }) {
 
 
 
-export function IconFolder67CDFF({ width, height, className }) {
+export function IconFolder67CDFF({ width, height }: IconProps) {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox="0 0 120 100" fill="none">
       <g clipPath="url(#clip0_2469_18163)">
@@ -163,7 +169,7 @@ export function IconFolder67CDFF({ width, height, className }) {
   )
 } 
 
-export function IconFolder717171({ width, height, className }) {
+export function IconFolder717171({ width, height }: IconProps ) {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox="0 0 120 100" fill="none">
       <g clipPath="url(#clip0_2469_18181)">
@@ -187,7 +193,7 @@ export function IconFolder717171({ width, height, className }) {
   )
 } 
 
-export function IconFolder1C82F6({ width, height, className }) {
+export function IconFolder1C82F6({ width, height }: IconProps) {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox="0 0 120 100" fill="none">
       <g clipPath="url(#clip0_2469_18166)">
@@ -211,7 +217,7 @@ export function IconFolder1C82F6({ width, height, className }) {
   )
 } 
 
-export function IconFolder59D878({ width, height, className }) {
+export function IconFolder59D878({ width, height }: IconProps) {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox="0 0 120 100" fill="none">
       <g clipPath="url(#clip0_2469_18169)">
@@ -235,7 +241,7 @@ export function IconFolder59D878({ width, height, className }) {
   )
 } 
 
-export function IconFolderFFDC4B({ width, height, className }) {
+export function IconFolderFFDC4B({ width, height }: IconProps ) {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox="0 0 120 100" fill="none">
       <g clipPath="url(#clip0_2469_18172)">
@@ -259,7 +265,7 @@ export function IconFolderFFDC4B({ width, height, className }) {
   )
 } 
 
-export function IconFolderFF625A({ width, height, className }) {
+export function IconFolderFF625A({ width, height }: IconProps) {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox="0 0 120 100" fill="none">
       <g clipPath="url(#clip0_2469_18175)">
@@ -283,7 +289,7 @@ export function IconFolderFF625A({ width, height, className }) {
   )
 } 
 
-export function IconFolder7568F1({ width, height, className }) {
+export function IconFolder7568F1({ width, height }: IconProps) {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox="0 0 120 100" fill="none">
       <g clipPath="url(#clip0_2469_18178)">
@@ -307,7 +313,7 @@ export function IconFolder7568F1({ width, height, className }) {
   )
 } 
 
-export function IconEdit({ width, height, className }) {
+export function IconEdit({ width, height, className }: IconProps    ) {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox="0 0 24 24" fill="none" className={className}>
       <path d="M21 19.6924L21.0762 19.6963C21.4543 19.7346 21.7498 20.0542 21.75 20.4424C21.75 20.8308 21.4545 21.1512 21.0762 21.1895L21 21.1924H13.7471C13.3329 21.1924 12.9971 20.8566 12.9971 20.4424C12.9973 20.0284 13.333 19.6924 13.7471 19.6924H21Z" fill="currentColor"/>
@@ -318,7 +324,7 @@ export function IconEdit({ width, height, className }) {
 } 
 
 
-export function IconArrowRightSquare({ width, height, className }) {
+export function IconArrowRightSquare({ width, height, className }: IconProps) {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox="0 0 16 16" fill="none" className={className}>
       <path d="M5.27873 2.33268C4.37296 2.33268 3.64122 2.61355 3.14071 3.07943C2.64424 3.54157 2.33472 4.22291 2.33472 5.10937L2.33472 10.8887C2.33472 11.7751 2.64428 12.4563 3.14071 12.9186C3.64124 13.3847 4.37299 13.666 5.27873 13.666H10.724C11.6298 13.666 12.3615 13.3847 12.8621 12.9186C13.3585 12.4563 13.6681 11.7751 13.6681 10.8887V5.10937C13.6681 4.22676 13.3589 3.54532 12.8621 3.08203C12.3612 2.61512 11.6292 2.33268 10.724 2.33268H5.27873ZM10.724 1.33268C11.8369 1.33268 12.8271 1.68219 13.5437 2.35026C14.2642 3.02197 14.6681 3.97881 14.6681 5.10937V10.8887C14.6681 12.0222 14.2647 12.9797 13.5437 13.651C12.8267 14.3186 11.8363 14.666 10.724 14.666H5.27873C4.16648 14.666 3.17602 14.3186 2.45907 13.651C1.73808 12.9797 1.33472 12.0222 1.33472 10.8887L1.33472 5.10937C1.33472 3.97593 1.73815 3.01883 2.45907 2.34766C3.17605 1.68024 4.16653 1.33268 5.27873 1.33268H10.724Z" fill="currentColor"/>
@@ -328,7 +334,7 @@ export function IconArrowRightSquare({ width, height, className }) {
   )
 } 
 
-export function IconDelete({ width, height, className }) {
+export function IconDelete({ width, height, className }: IconProps) {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox="0 0 16 16" fill="none" className={className}>
       <path d="M12.9229 5.81218C13.1981 5.83437 13.4034 6.07599 13.3812 6.35124V6.3545C13.381 6.35668 13.3802 6.36004 13.3799 6.36426C13.3792 6.37282 13.3786 6.3855 13.3773 6.40202C13.3746 6.43539 13.3707 6.48468 13.3656 6.54786C13.3552 6.67446 13.3399 6.85763 13.3213 7.08301C13.284 7.53386 13.2319 8.15486 13.1735 8.83497C13.0568 10.1929 12.9134 11.7942 12.8076 12.7471C12.7476 13.2893 12.5434 13.7689 12.1703 14.1156C11.796 14.4632 11.301 14.6315 10.7477 14.6416C9.00286 14.673 7.25479 14.6752 5.50879 14.6384C4.96695 14.6272 4.48341 14.4531 4.11882 14.1058C3.75641 13.7604 3.55536 13.2853 3.49642 12.7516C3.38997 11.7905 3.24688 10.1881 3.13054 8.83106C3.07228 8.15151 3.02048 7.53169 2.9834 7.08171C2.96486 6.85669 2.95005 6.67354 2.93978 6.54721C2.93467 6.48427 2.93075 6.4353 2.92806 6.40202C2.92673 6.38555 2.9255 6.37282 2.92481 6.36426C2.92448 6.36014 2.92433 6.35667 2.92416 6.3545C2.92408 6.35349 2.9242 6.35244 2.92416 6.35189L2.92351 6.35124C2.90139 6.07608 3.10672 5.83444 3.38184 5.81218C3.657 5.79006 3.89864 5.99539 3.9209 6.27051V6.27377C3.92107 6.2759 3.92121 6.27933 3.92155 6.28353C3.92224 6.29202 3.92347 6.30472 3.92481 6.32129C3.92749 6.35448 3.93141 6.40348 3.93653 6.46648C3.94677 6.59243 3.96165 6.77455 3.98015 6.99903C4.01717 7.44827 4.06848 8.06746 4.12663 8.74577C4.2431 10.1044 4.38569 11.6947 4.49056 12.6416C4.52966 12.9951 4.65205 13.233 4.80827 13.3818C4.9622 13.5285 5.19314 13.6314 5.53028 13.6384C7.26138 13.6749 8.99594 13.6728 10.7295 13.6416C11.0902 13.635 11.3317 13.5301 11.4899 13.3831C11.6493 13.2351 11.7742 12.9981 11.8141 12.637L11.8981 11.8252C11.9876 10.9185 12.0898 9.76956 12.1774 8.74968C12.2357 8.07099 12.2874 7.45108 12.3245 7.00098C12.3431 6.77607 12.3585 6.59343 12.3688 6.46713C12.374 6.40397 12.3778 6.35457 12.3805 6.32129C12.3819 6.30472 12.3825 6.29204 12.3831 6.28353C12.3835 6.27927 12.3843 6.27592 12.3844 6.27377V6.27051C12.4067 5.99543 12.6478 5.79012 12.9229 5.81218Z" fill="currentColor"/>
@@ -341,7 +347,7 @@ export function IconDelete({ width, height, className }) {
 
 
 
-export function IconArrowLeft({ width, height, className }) {
+export function IconArrowLeft({ width, height, className }: IconProps ) {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox="0 0 32 32" fill="none" className={className}>
       <path d="M5.66602 15.3652L25.666 15.3652C26.2183 15.3652 26.666 15.8129 26.666 16.3652C26.666 16.9175 26.2183 17.3652 25.666 17.3652L5.66602 17.3652C5.11373 17.3652 4.66602 16.9175 4.66602 16.3652C4.66602 15.8129 5.11373 15.3652 5.66602 15.3652Z" fill="currentColor"/>
@@ -350,7 +356,7 @@ export function IconArrowLeft({ width, height, className }) {
   )
 } 
 
-export function IconSearch({ width, height, className }) {
+export function IconSearch({ width, height, className }: IconProps ) {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox="0 0 20 20" fill="none" className={className}>
       <path d="M16.6707 9.80469C16.6706 6.0131 13.5963 2.93945 9.80469 2.93945C6.01318 2.93958 2.93958 6.01318 2.93945 9.80469C2.93945 13.5963 6.0131 16.6706 9.80469 16.6707C13.5964 16.6707 16.6707 13.5964 16.6707 9.80469ZM17.9207 9.80469C17.9207 14.2867 14.2867 17.9207 9.80469 17.9207C5.32275 17.9206 1.68945 14.2867 1.68945 9.80469C1.68958 5.32282 5.32282 1.68958 9.80469 1.68945C14.2867 1.68945 17.9206 5.32275 17.9207 9.80469Z" fill="currentColor"/>
@@ -359,7 +365,7 @@ export function IconSearch({ width, height, className }) {
   )
 } 
 
-export function IconUpload({ width, height, className }) {
+export function IconUpload({ width, height, className }: IconProps) {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox="0 0 24 25" fill="none" className={className}>
       <path d="M7.38965 10.1191H6.45605C4.83547 10.1194 3.52148 11.434 3.52148 13.0547L3.52148 17.9297C3.5217 19.549 4.83547 20.863 6.45605 20.8633H17.5869C19.2075 20.863 20.5213 19.549 20.5215 17.9297V13.0439C20.5213 11.4291 19.212 10.1192 17.5977 10.1191H16.6543C16.2402 10.119 15.9043 9.78329 15.9043 9.36914C15.9044 8.95506 16.2402 8.61924 16.6543 8.61914H17.5977C20.0409 8.61923 22.0213 10.6012 22.0215 13.0439V17.9297C22.0213 20.3777 20.0357 22.363 17.5869 22.3633H6.45605C4.00731 22.363 2.0217 20.3777 2.02148 17.9297V13.0547C2.02148 10.6056 4.00704 8.61937 6.45605 8.61914H7.38965C7.80374 8.61923 8.13957 8.95505 8.13965 9.36914C8.13965 9.7833 7.80379 10.1191 7.38965 10.1191Z" fill="currentColor"/>
@@ -370,7 +376,7 @@ export function IconUpload({ width, height, className }) {
 } 
 
 
-export function IconNotification({ width, height, className }) {
+export function IconNotification({ width, height, className }: IconProps) {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox="0 0 24 24" fill="none" className={className}>
       <path d="M17.9316 7.94531C17.9316 5.59441 15.6471 2.75 12 2.75C8.35295 2.75 6.06836 5.59441 6.06836 7.94531C6.06834 8.90157 5.94595 9.63659 5.74805 10.25C5.55059 10.8619 5.28797 11.3227 5.05371 11.7148C4.81388 12.1163 4.62633 12.4127 4.48438 12.7842C4.35126 13.1325 4.25345 13.5643 4.25 14.1865C4.30657 14.7878 4.47709 15.2243 4.73535 15.5586C4.99998 15.9011 5.40097 16.1932 6.00391 16.4287C7.24658 16.914 9.17784 17.0977 12 17.0977C14.8223 17.0977 16.7544 16.9115 17.9971 16.4248C18.6002 16.1886 19.001 15.896 19.2656 15.5537C19.5238 15.2198 19.6927 14.7845 19.749 14.1865C19.7456 13.5643 19.6487 13.1325 19.5156 12.7842C19.3737 12.4127 19.1861 12.1163 18.9463 11.7148C18.712 11.3227 18.4494 10.8619 18.252 10.25C18.054 9.63659 17.9317 8.90157 17.9316 7.94531ZM19.4316 7.94531C19.4317 8.76879 19.5357 9.34557 19.6787 9.78906C19.8223 10.234 20.014 10.5764 20.2344 10.9453C20.4492 11.3049 20.717 11.7282 20.916 12.249C21.1215 12.7867 21.25 13.4105 21.25 14.2207C21.25 14.2422 21.2489 14.2637 21.2471 14.2852C21.1744 15.1228 20.9256 15.8581 20.4521 16.4707C19.9806 17.0806 19.3292 17.5137 18.5439 17.8213C17.0094 18.4223 14.817 18.5977 12 18.5977C9.18442 18.5977 6.99255 18.4246 5.45801 17.8252C4.67253 17.5184 4.02067 17.0862 3.54883 16.4756C3.07499 15.8622 2.82584 15.1252 2.75293 14.2852C2.75107 14.2637 2.75001 14.2422 2.75 14.2207C2.75 13.4105 2.87852 12.7867 3.08398 12.249C3.28303 11.7282 3.55079 11.3049 3.76562 10.9453C3.98604 10.5764 4.17772 10.234 4.32129 9.78906C4.46434 9.34557 4.56834 8.76879 4.56836 7.94531C4.56836 4.73427 7.5566 1.25 12 1.25C16.4434 1.25 19.4316 4.73427 19.4316 7.94531Z" fill="currentColor"/>
@@ -380,7 +386,7 @@ export function IconNotification({ width, height, className }) {
 } 
 
 
-export function IconX({ width, height, className }) {
+export function IconX({ width, height, className }: IconProps) {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox="0 0 24 24" fill="none" className={className}>
       <path d="M7.22733 6.16776L17.8339 16.7744C18.1268 17.0673 18.1268 17.5421 17.8339 17.835C17.541 18.1279 17.0662 18.1279 16.7733 17.835L6.16667 7.22842C5.87377 6.93552 5.87377 6.46065 6.16667 6.16776C6.45956 5.87486 6.93443 5.87486 7.22733 6.16776Z" fill="currentColor"/>
@@ -389,7 +395,7 @@ export function IconX({ width, height, className }) {
   )
 } 
 
-export function IconDangerCircle({ width, height, className }) {
+export function IconDangerCircle({ width, height, className }: IconProps) {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox="0 0 24 24" fill="none" className={className}>
       <path d="M20.5 12C20.5 7.30527 16.6938 3.5 12 3.5C7.30521 3.5 3.5 7.30521 3.5 12C3.5 16.6938 7.30527 20.5 12 20.5C16.6938 20.5 20.5 16.6938 20.5 12ZM22 12C22 17.5222 17.5222 22 12 22C6.47673 22 2 17.5222 2 12C2 6.47679 6.47679 2 12 2C17.5222 2 22 6.47673 22 12Z" fill="currentColor"/>
@@ -401,7 +407,7 @@ export function IconDangerCircle({ width, height, className }) {
 
 
 
-export function IconPaperFail({ width, height, className }) {
+export function IconPaperFail({ width, height, className }: IconProps) {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox="0 0 24 24" fill="none" className={className}>
       <path d="M14.7373 2.01172L14.8135 2.01562C14.9895 2.03366 15.1547 2.11334 15.2783 2.24219L20.3428 7.52051C20.4768 7.66017 20.5518 7.84647 20.5518 8.04004V17.3379C20.5566 19.8185 18.5607 21.8388 16.0811 21.8643L16.0732 21.8652V21.8643H8.20898C8.1722 21.8652 8.12506 21.8662 8.0752 21.8662L8.07617 21.8672L8.07324 21.8662L8.07227 21.8672V21.8662C5.56085 21.8794 3.51436 19.8556 3.5 17.3438V6.49023C3.50026 4.01754 5.50456 2.01198 7.97852 2.01172H14.7373ZM5 17.335L5.00488 17.4922C5.09568 19.1035 6.43537 20.3773 8.06738 20.3672H8.07227C8.10103 20.3672 8.13062 20.3663 8.1709 20.3652L8.19043 20.3643H16.0732C17.7258 20.3433 19.055 18.9954 19.0518 17.3408V8.34082L14.417 3.51172H7.97852C6.33324 3.51198 5.00026 4.8457 5 6.49023V17.335Z" fill="currentColor"/>
@@ -415,7 +421,7 @@ export function IconPaperFail({ width, height, className }) {
 
 
 
-export function IconPlusSquare({ width, height, className }) {
+export function IconPlusSquare({ width, height, className }: IconProps) {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox="0 0 24 24" fill="none" className={className}>
       <path d="M11.25 15.6533V8.32715C11.25 7.91293 11.5858 7.57715 12 7.57715C12.414 7.57735 12.75 7.91306 12.75 8.32715V15.6533C12.75 16.0674 12.414 16.4031 12 16.4033C11.5858 16.4033 11.25 16.0675 11.25 15.6533Z" fill="currentColor"/>
@@ -427,7 +433,7 @@ export function IconPlusSquare({ width, height, className }) {
 
 
 
-export function IconCheck({ width, height, className }) {
+export function IconCheck({ width, height, className }: IconProps) {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox="0 0 24 24" fill="none" className={className}>
       <path d="M12 2C17.5222 2 22 6.47673 22 12C22 17.5222 17.5222 22 12 22C6.47779 22 2 17.5222 2 12C2 6.47673 6.47784 2 12 2ZM16.0918 9.09668C15.7989 8.80381 15.3241 8.80384 15.0312 9.09668L10.8145 13.3125L8.97168 11.4697L8.91504 11.418C8.62044 11.1776 8.18573 11.1951 7.91113 11.4697C7.6367 11.7444 7.61911 12.1791 7.85938 12.4736L7.91113 12.5303L10.2852 14.9033C10.578 15.1961 11.0528 15.1961 11.3457 14.9033L16.0918 10.1572C16.3846 9.86435 16.3846 9.38956 16.0918 9.09668Z" fill="currentColor"/>

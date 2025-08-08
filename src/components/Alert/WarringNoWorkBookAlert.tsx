@@ -13,7 +13,6 @@ const WarringNoWorkBookAlert: React.FC = () => {
 
   const handleSave = () => {
     closeAlert();
-    closeModal();
   };
 
   return (

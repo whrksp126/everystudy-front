@@ -1,10 +1,9 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
 import type { ReactNode } from 'react';
 import type { 
   DataContextType, 
   DataItem
 } from '../types/data';
-import { IconFolder7568F1 } from '../assets/Icon.jsx';
 import { SERVER_URL } from '../utils/server.js';
 import { fetchDataAsync } from '../utils/common.js';
 
@@ -52,50 +51,96 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     //   setUserInfo(userInfo);
     //   setUserInfoLoaded(true);
     // }
+
+
+    
   };
 
   // 내 문서 조회
   const getFetchMyDocs = async () => {
     
-    // const url = `${SERVER_URL}/user/my-docs`;
-    // const method = 'GET';
-    // const data = {};
-    // const myDocs = await fetchDataAsync(url, method, data);
-    // if(myDocs){
-    //   setMyDocs(myDocs);
-    // }
+    const url = `${SERVER_URL}/folder/workbook/folder_list`;
+    const method = 'GET';
+    const data = {};
+    try{
+      const result = await fetchDataAsync(url, method, data);
+      if(result){
+        setMyDocs(result);
+      }
+    }catch(error){
+      console.error(error);
+    }
+    
+    
 
-    // 교재 데이터
-    setMyDocs(
-      [
-        {
-          id: '1',
-          title: '고2 중간고사 모음',
-          image: null as string | null,
-          isFolder: true,
-          folderIcon: IconFolder7568F1,
-          updatedAt: new Date(2024, 11, 15, 14, 30, 0), // 2024년 12월 15일 14시 30분 0초
-          createdAt: new Date(2024, 11, 15, 14, 30, 0), // 2024년 12월 15일 14시 30분 0초
-        },  
-        {
-          id: '2',
-          title: '2026 마더텅 수능기출문제집 수학 2 (2025년)',
-          image: 'https://image.yes24.com/goods/140199667/XL',
-          isFolder: false,
-          updatedAt: new Date(2024, 11, 10, 9, 15, 0), // 2024년 12월 10일 9시 15분 0초
-          createdAt: new Date(2024, 11, 10, 9, 15, 0), // 2024년 12월 10일 9시 15분 0초
-        },
-        {
-          id: '3',
-          title: 'Xistory 자이스토리 공통수학2 (2025년)',
-          image: 'https://image.yes24.com/goods/137485546/XL',
-          isFolder: false,
-          updatedAt: new Date(2024, 11, 5, 16, 45, 30), // 2024년 12월 5일 16시 45분 30초
-          createdAt: new Date(2024, 11, 5, 16, 45, 30), // 2024년 12월 5일 16시 45분 30초
-        },
-      ]
-    )
+    // // 교재 데이터
+    // setMyDocs(
+    //   [
+    //    {
+    //      id: '1',
+    //      title: '고2 중간고사 모음',
+    //      image: null as string | null,
+    //      type: 'folder',
+    //      folderIcon: IconFolder7568F1,
+    //      items: [
+    //        {
+    //          id: '2',
+    //          type: 'workbook',
+    //          title: '2026 마더텅 수능기출문제집 수학 2 (2025년)',
+    //          image: 'https://image.yes24.com/goods/140199667/XL',
+    //          isFolder: false,
+    //          updatedAt: new Date(2024, 11, 10, 9, 15, 0), // 2024년 12월 10일 9시 15분 0초
+    //          createdAt: new Date(2024, 11, 10, 9, 15, 0), // 2024년 12월 10일 9시 15분 0초
+    //        },
+    //      ]
+    //      updatedAt: new Date(2024, 11, 15, 14, 30, 0), // 2024년 12월 15일 14시 30분 0초
+    //      createdAt: new Date(2024, 11, 15, 14, 30, 0), // 2024년 12월 15일 14시 30분 0초
+    //    },  
+      //  {
+      //     id: '2',
+      //     type: 'workbook',
+      //     title: '2026 마더텅 수능기출문제집 수학 2 (2025년)',
+      //     image: 'https://image.yes24.com/goods/140199667/XL',
+      //     updatedAt: new Date(2024, 11, 10, 9, 15, 0), // 2024년 12월 10일 9시 15분 0초
+      //     createdAt: new Date(2024, 11, 10, 9, 15, 0), // 2024년 12월 10일 9시 15분 0초
+      //   },
+    //     {
+    //       id: '3',
+    //       type: 'workbook',
+    //       title: 'Xistory 자이스토리 공통수학2 (2025년)',
+    //       image: 'https://image.yes24.com/goods/137485546/XL',
+    //       updatedAt: new Date(2024, 11, 5, 16, 45, 30), // 2024년 12월 5일 16시 45분 30초
+    //       createdAt: new Date(2024, 11, 5, 16, 45, 30), // 2024년 12월 5일 16시 45분 30초
+    //     },
+    //   ]
+    // )
     setMyDocsLoaded(true);
+  };
+
+  // 폴더 트리 구조에서 재귀적으로 folderId를 찾아 이름을 변경하는 함수
+  const updateFolderDataRecursive = (items: any[], folder: any): any[] => {
+    return items.map((item) => {
+      if (item.type === 'folder') {
+        if (item.id === folder.id) {
+          // 해당 폴더를 찾았으면 이름만 변경
+          return { ...item, ...folder };
+        }
+        // 하위 items가 있으면 재귀적으로 탐색
+        if (item.items && Array.isArray(item.items)) {
+          return { ...item, items: updateFolderDataRecursive(item.items, folder) };
+        }
+      }
+      return item;
+    });
+  };
+
+  // 폴더 이름 업데이트 함수
+  const setUpdateMyDocsFolder = async (folder: any) => {
+    console.log('setUpdateMyDocsFolder');
+    // 백엔드 서버 업데이트
+    // 성공 시
+    // dataContext 내부 데이터 업데이트
+    setMyDocs((prev: any[]) => updateFolderDataRecursive(prev, folder));
   };
 
   // 단어장 조회
@@ -138,123 +183,127 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
 
   // E-BOOK 조회
   const getFetchEbooks = async () => {
-    // const url = `${SERVER_URL}/user/ebooks`;
-    // const method = 'GET';
-    // const data = {};
-    // const ebooks = await fetchDataAsync(url, method, data);
-    // if(ebooks){
-    //   setEbooks(ebooks);
-    //   setEbooksLoaded(true);
-    // }
-
-    setEbooks(
-      [
-        {
-          id: 'ebook-section-1',
-          title: '다운로드 수가 많아요',
-          books: [
-            {
-              id: '1',
-              title: '2026 마더텅 수능기출문제집 수학 2 (2025년)',
-              tags: [{name: '고3', color: 'purple'},{name: '연계', color: 'blue'},],
-              area: '수학',
-              publisher: '한국교육방송공사',
-              releaseDate: new Date(2024, 11, 1),
-              image: 'https://image.yes24.com/goods/140199667/XL',
-              files : {
-                pdfs : [
-                  {
-                    id: 'pdf id 1',
-                    title: '문제집 파일',
-                  },
-                  {
-                    id: 'pdf id 2',
-                    title: '해설 파일',
-                  }
-                ],
-                mp3s : [
-                  {
-                    id: 'mp3 id 1',
-                    title: '음성 파일'
-                  }
-                ],
-              }
-            },
-            {
-              id: '2',
-              title: 'Xistory 자이스토리 공통수학2 (2025년)',
-              tags: [{name: '고3',color: 'purple',},{name: '연계',color: 'blue',},],
-              area: '수학',
-              publisher: '한국교육방송공사',
-              releaseDate: new Date(2024, 11, 1),
-              image: 'https://image.yes24.com/goods/137485546/XL',
-              files : {
-                pdfs : [{title: '문제집 파일'},{title: '해설 파일'}],
-                mp3s : [{title: '음성 파일'}],
-              }
-            },
-            {
-              id: '3',
-              title: 'EBS 수능완성 수학영역 (2025년)',
-              tags: [{name: '고3',color: 'purple',},{name: '연계',color: 'blue',},],
-              area: '수학',
-              publisher: '한국교육방송공사',
-              releaseDate: new Date(2024, 11, 1),
-              image: 'https://image.yes24.com/goods/138000000/XL',
-              files : {
-                pdfs : [{title: '문제집 파일'},{title: '해설 파일'}],
-                mp3s : [{title: '음성 파일'}],
-              }
-            },
-          ],
-        },
-        {
-          id: 'ebook-section-2',
-          title: '새로 들어왔어요',
-          books: [
-            {
-              id: '4',
-              title: '2025 수능특강 영어 (2025년)',
-              tags: [{name: '고3',color: 'purple',},{name: '연계',color: 'blue',},],
-              area: '영어',
-              publisher: '한국교육방송공사',
-              image: 'https://image.yes24.com/goods/139000000/XL',
-              releaseDate: new Date(2024, 11, 1),
-              files : {
-                pdfs : [{title: '문제집 파일'},{title: '해설 파일'}],
-                mp3s : [{title: '음성 파일'}],
-              }
-            },
-            {
-              id: '5',
-              title: '고등 수학의 정석 (2025년)',
-              tags: [{name: '고3',color: 'purple',},{name: '연계',color: 'blue',},],
-              area: '수학',
-              publisher: '한국교육방송공사',
-              image: 'https://image.yes24.com/goods/140000000/XL',
-              releaseDate: new Date(2024, 11, 5),
-              files : {
-                pdfs : [{title: '문제집 파일'},{title: '해설 파일'}],
-                mp3s : [{title: '음성 파일'}],
-              }
-            },
-            {
-              id: '6',
-              title: '물리학 개념서 (2025년)',
-              tags: [{name: '고3',color: 'purple',},{name: '연계',color: 'blue',},],
-              area: '물리',
-              publisher: '한국교육방송공사',
-              image: 'https://image.yes24.com/goods/141000000/XL',
-              releaseDate: new Date(2024, 11, 10),
-              files : {
-                pdfs : [{title: '문제집 파일'},{title: '해설 파일'}],
-                mp3s : [{title: '음성 파일'}],
-              }
-            },
-          ],
-        },
-      ]
-    );
+    const url = `${SERVER_URL}/workbook/bookmanagement`;
+    const method = 'GET';
+    const data = {};
+    try{
+      const ebooks = await fetchDataAsync(url, method, data);
+      if(ebooks){
+        setEbooks(ebooks);
+        setEbooksLoaded(true);
+      }
+    }catch(error){
+      console.error(error);
+    }
+    
+    // setEbooks(
+    //   [
+    //     {
+    //       id: 'ebook-section-1',
+    //       title: '다운로드 수가 많아요',
+    //       books: [
+            // {
+            //   id: '1',
+            //   title: '2026 마더텅 수능기출문제집 수학 2 (2025년)',
+            //   tags: [{name: '고3', color: 'purple'},{name: '연계', color: 'blue'},],
+            //   area: '수학',
+            //   publisher: '한국교육방송공사',
+            //   releaseDate: new Date(2024, 11, 1),
+            //   image: 'https://image.yes24.com/goods/140199667/XL',
+            //   files : {
+            //     pdfs : [
+            //       {
+            //         id: 'pdf id 1',
+            //         title: '문제집 파일',
+            //       },
+            //       {
+            //         id: 'pdf id 2',
+            //         title: '해설 파일',
+            //       }
+            //     ],
+            //     audios : [
+            //       {
+            //         id: 'mp3 id 1',
+            //         title: '음성 파일'
+            //       }
+            //     ],
+            //   }
+            // },
+    //         {
+    //           id: '2',
+    //           title: 'Xistory 자이스토리 공통수학2 (2025년)',
+    //           tags: [{name: '고3',color: 'purple',},{name: '연계',color: 'blue',},],
+    //           area: '수학',
+    //           publisher: '한국교육방송공사',
+    //           releaseDate: new Date(2024, 11, 1),
+    //           image: 'https://image.yes24.com/goods/137485546/XL',
+    //           files : {
+    //             pdfs : [{title: '문제집 파일'},{title: '해설 파일'}],
+    //             audios : [{title: '음성 파일'}],
+    //           }
+    //         },
+    //         {
+    //           id: '3',
+    //           title: 'EBS 수능완성 수학영역 (2025년)',
+    //           tags: [{name: '고3',color: 'purple',},{name: '연계',color: 'blue',},],
+    //           area: '수학',
+    //           publisher: '한국교육방송공사',
+    //           releaseDate: new Date(2024, 11, 1),
+    //           image: 'https://image.yes24.com/goods/138000000/XL',
+    //           files : {
+    //             pdfs : [{title: '문제집 파일'},{title: '해설 파일'}],
+    //             audios : [{title: '음성 파일'}],
+    //           }
+    //         },
+    //       ],
+    //     },
+    //     {
+    //       id: 'ebook-section-2',
+    //       title: '새로 들어왔어요',
+    //       books: [
+    //         {
+    //           id: '4',
+    //           title: '2025 수능특강 영어 (2025년)',
+    //           tags: [{name: '고3',color: 'purple',},{name: '연계',color: 'blue',},],
+    //           area: '영어',
+    //           publisher: '한국교육방송공사',
+    //           image: 'https://image.yes24.com/goods/139000000/XL',
+    //           releaseDate: new Date(2024, 11, 1),
+    //           files : {
+    //             pdfs : [{title: '문제집 파일'},{title: '해설 파일'}],
+    //             audios : [{title: '음성 파일'}],
+    //           }
+    //         },
+    //         {
+    //           id: '5',
+    //           title: '고등 수학의 정석 (2025년)',
+    //           tags: [{name: '고3',color: 'purple',},{name: '연계',color: 'blue',},],
+    //           area: '수학',
+    //           publisher: '한국교육방송공사',
+    //           image: 'https://image.yes24.com/goods/140000000/XL',
+    //           releaseDate: new Date(2024, 11, 5),
+    //           files : {
+    //             pdfs : [{title: '문제집 파일'},{title: '해설 파일'}],
+    //             audios : [{title: '음성 파일'}],
+    //           }
+    //         },
+    //         {
+    //           id: '6',
+    //           title: '물리학 개념서 (2025년)',
+    //           tags: [{name: '고3',color: 'purple',},{name: '연계',color: 'blue',},],
+    //           area: '물리',
+    //           publisher: '한국교육방송공사',
+    //           image: 'https://image.yes24.com/goods/141000000/XL',
+    //           releaseDate: new Date(2024, 11, 10),
+    //           files : {
+    //             pdfs : [{title: '문제집 파일'},{title: '해설 파일'}],
+    //             audios : [{title: '음성 파일'}],
+    //           }
+    //         },
+    //       ],
+    //     },
+    //   ]
+    // );
   };
 
   // 복습 노트 조회
@@ -302,29 +351,29 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     return userInfo;
   };
 
-  const getMyDocs = () => {
+  const getMyDocs = useCallback(() => {
     return myDocs;
-  };
+  }, [myDocs]);
 
-  const getReviewNotes = () => {
+  const getReviewNotes = useCallback(() => {
     return reviewNotes;
-  };
+  }, [reviewNotes]);
 
-  const getDiyExams = () => {
+  const getDiyExams = useCallback(() => {
     return diyExams;
-  };
+  }, [diyExams]);
 
-  const getEbooks = () => {
+  const getEbooks = useCallback(() => {
     return ebooks;
-  };
+  }, [ebooks]);
 
-  const getAllEbooks = () => {
+  const getAllEbooks = useCallback(() => {
     return ebooks.flatMap((section: any) => section.books);
-  };
+  }, [ebooks]);
 
-  const getVocabs = () => {
+  const getVocabs = useCallback(() => {
     return vocabs;
-  };
+  }, [vocabs]);
 
 
   // // 최근 공부한 교재 데이터
@@ -352,7 +401,10 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     // 내 문서
     myDocs,
     getMyDocs,
+    setMyDocs,
     myDocsLoaded,
+    setUpdateMyDocsFolder,
+    
     // 복습 노트
     reviewNotes,
     getReviewNotes,

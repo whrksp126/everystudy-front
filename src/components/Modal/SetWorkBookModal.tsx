@@ -1,11 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useModal } from '../../hooks/useModal';
-import { IconArrowLeft, IconUpload, IconX } from '../../assets/Icon';
+import { IconArrowLeft, IconUpload, IconX } from '../../assets/Icon.tsx';
 import { useAlert } from '../../hooks/useAlert';
 import WarringNoWorkBookAlert from '../Alert/WarringNoWorkBookAlert';
 import { useFileSelector } from '../../hooks/useFileSelector';
 import { FileSelectorModal } from '../FileSelectorModal';
-import { saveWorkBookPathfetch } from '../../api/workbook';
+import { setWorkBookPathfetch } from '../../api/workbook';
 
 const SetWorkBookModal: React.FC<{item: any}> = ({item}) => {
   const { popModal, closeModal } = useModal();
@@ -35,7 +35,7 @@ const SetWorkBookModal: React.FC<{item: any}> = ({item}) => {
       
       setFiles((prevFiles: { [key: string]: any[] }) => {
         const updatedFiles = { ...prevFiles };
-        const fileType = currentFileIndex.type === 'pdf' ? 'pdfs' : 'mp3s';
+        const fileType = currentFileIndex.type === 'pdf' ? 'pdfs' : 'audios';
         const arr = Array.isArray(updatedFiles[fileType]) ? [...updatedFiles[fileType]] : [];
         
         // 선택된 인덱스에 파일 저장
@@ -51,7 +51,7 @@ const SetWorkBookModal: React.FC<{item: any}> = ({item}) => {
             page_count: pdfData.page_count,
             size: pdfData.size
           };
-        } else if (currentFileIndex.type === 'mp3') {
+        } else if (currentFileIndex.type === 'audio') {
           const audioData = fileData as AudioData;
           arr[currentFileIndex.index] = {
             ...arr[currentFileIndex.index],
@@ -85,7 +85,7 @@ const SetWorkBookModal: React.FC<{item: any}> = ({item}) => {
       // 1초 후에 실행
       await new Promise(resolve => setTimeout(resolve, 1000));
 
-      if(type === 'pdf' || type === 'mp3'){
+      if(type === 'pdf' || type === 'audio'){
         setCurrentFileIndex({ type, index });
         await fileSelector.openFileSelector(type, index, bookId);
         return;
@@ -100,17 +100,27 @@ const SetWorkBookModal: React.FC<{item: any}> = ({item}) => {
       setTimeout(() => {
         setFileStates(prev => ({ ...prev, [fileKey]: 'idle' }));
       }, 3000);
-    }
+    };
   };
 
 
   const handleSave = async () => {
-    console.log(files);
-    await saveWorkBookPathfetch(workBook, files);
-    // openAlert(WarringNoWorkBookAlert, {
-    //   preserveState: true, 
-    //   keepInDOM: true 
-    // });
+    if(!files.pdfs[0].path){
+      openAlert(WarringNoWorkBookAlert, {
+        preserveState: true, 
+        keepInDOM: true 
+      });
+      return;
+    }
+    try{
+      const result = await setWorkBookPathfetch(workBook, files);
+      console.log(result);
+      if(result){
+        closeModal();
+      }
+    }catch(error){
+      console.error(error);
+    }
   };
 
   // 상태 초기화 함수(현재 업로드 중인 파일만 idle로)
@@ -186,17 +196,17 @@ const SetWorkBookModal: React.FC<{item: any}> = ({item}) => {
                 {/* 영역 */}
                 <div className="flex items-center gap-[4px]">
                   <h4 className="w-[50px] h-[20px] text-15m text-black">영역</h4>
-                  <span className="text-15m text-gray-400">{workBook.area}</span>
+                  <span className="text-15m text-gray-400">{workBook.area || ''}</span>
                 </div>
                 {/* 출판사 */}
                 <div className="flex items-center gap-[4px]">
                   <h4 className="w-[50px] h-[20px] text-15m text-black">출판사</h4>
-                  <span className="text-15m text-gray-400">{workBook.publisher}</span>
+                  <span className="text-15m text-gray-400">{workBook.publisher || ''}</span>
                 </div>
                 {/* 발행일 */}
                 <div className="flex items-center gap-[4px]">
                   <h4 className="w-[50px] h-[20px] text-15m text-black">발행일</h4>
-                  <span className="text-15m text-gray-400">{workBook.releaseDate.toLocaleDateString()}</span>
+                  <span className="text-15m text-gray-400">{workBook?.releaseDate ? new Date(workBook.releaseDate).toLocaleDateString() : ''}</span>
                 </div>
               </div>
             </div>
@@ -262,9 +272,9 @@ const SetWorkBookModal: React.FC<{item: any}> = ({item}) => {
             </div>
           </div>
           ))}
-          {files.mp3s.map((file: any, index: number) => (
+          {files.audios.map((file: any, index: number) => (
           <div 
-            onClick={() => handleFileUpload('mp3', index, workBook.id)}
+            onClick={() => handleFileUpload('audio', index, workBook.id)}
             key={`audio-${index}`} className="flex flex-col flex-1 gap-[16px]">
             <h3 className="text-16s text-black">{file.title}</h3>
             <div className={`
@@ -274,37 +284,37 @@ const SetWorkBookModal: React.FC<{item: any}> = ({item}) => {
               px-[20px] 
               border rounded-[10px]
               text-16m ${
-                fileStates[`mp3_${index}`] === 'loading' || fileStates[`mp3_${index}`] === 'success'
+                fileStates[`audio_${index}`] === 'loading' || fileStates[`audio_${index}`] === 'success'
                   ? 'border-blue-200 bg-blue-25 text-blue-400' 
-                  : fileStates[`mp3_${index}`] === 'validation_error' || fileStates[`mp3_${index}`] === 'upload_error'
+                  : fileStates[`audio_${index}`] === 'validation_error' || fileStates[`audio_${index}`] === 'upload_error'
                   ? 'border-red-200 bg-red-25 text-red-400'
                   : 'border-gray-75 bg-gray-25 text-gray-400'
                 }
               `}
               >
-                {fileStates[`mp3_${index}`] === 'loading' ? (
+                {fileStates[`audio_${index}`] === 'loading' ? (
                   <>
                     <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-400"></div>
                     <span className="text-center text-16r">업로드 중...</span>
                   </>
-                ) : fileStates[`mp3_${index}`] === 'validation_error' ? (
+                ) : fileStates[`audio_${index}`] === 'validation_error' ? (
                   <>
                     <IconUpload width={32} height={32} className="text-red-400" />
                     <span className="text-center text-16r text-red-400">MP3 파일을<br />업로드 해주세요.</span>
                   </>
-                ) : fileStates[`mp3_${index}`] === 'upload_error' ? (
+                ) : fileStates[`audio_${index}`] === 'upload_error' ? (
                   <>
                     <IconUpload width={32} height={32} className="text-red-400" />
                     <span className="text-center text-16r text-red-400">파일 업로드 실패<br />다시 시도해 주세요.</span>
                   </>
-                ) : fileStates[`mp3_${index}`] === 'success' ? (
+                ) : fileStates[`audio_${index}`] === 'success' ? (
                   <>
                     <span className="text-center text-16r">{file.name}</span>
                     <button 
                       className="absolute top-[12px] right-[12px]"
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleFileDelete('mp3', index);
+                        handleFileDelete('audio', index);
                       }}
                     >
                       <IconX width={24} height={24} className="text-gray-600" />
@@ -338,7 +348,7 @@ const SetWorkBookModal: React.FC<{item: any}> = ({item}) => {
           resetFileUploadStates();
         }}
         onFileSelect={(file) => fileSelector.handleFileSelect(file, currentFileIndex?.type || 'pdf')}
-        accept={currentFileIndex?.type === 'mp3' ? "audio/*" : "application/pdf"}
+        accept={currentFileIndex?.type === 'audio' ? "audio/*" : "application/pdf"}
       />
 
     </div>

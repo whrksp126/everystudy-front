@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { loginFetch } from '../api/login';
+import { setDeviceIdFetch } from '../api/device';
+import { DEVICE_DATA } from '../utils/osFunction';
+import { setDeviceData } from '../utils/localStorage';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('ui_test@test.com');
@@ -12,16 +15,27 @@ const Login: React.FC = () => {
     e.preventDefault();
     setIsLoading(true);
     console.log(email, password);
-    const result = await loginFetch(email, password);
-    if(result === null) return;
-    if(result.code == 200){
-      navigate('/home');
-    }else{
-      alert(result.msg)
+    try{
+      const result = await loginFetch(email, password);
+      if(result === null) alert("로그인 오류 다시 시도해주세요.");
+      if(result.code !== 200){
+        return alert(result.msg)
+      }
+      setDeviceData('email', email);
+    }catch(error){
+      return alert(error);
+    }
+    const type = DEVICE_DATA.TYPE
+    const code = DEVICE_DATA.ID
+    const name = DEVICE_DATA.NAME
+    try{
+      const result = await setDeviceIdFetch(type, code, name, email);
+      if(result === null) return alert("디바이스 식별자 생성 오류 다시 시도해주세요.");
+    }catch(error){
+      return alert(error);
     }
 
-
-    
+    navigate('/home');
     // // 실제 로그인 로직은 여기에 구현
     // setTimeout(() => {
     //   setIsLoading(false);

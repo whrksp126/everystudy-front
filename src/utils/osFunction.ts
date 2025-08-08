@@ -90,7 +90,7 @@ export const WEBVIEW_API_MAP = {
 // 파일 임시 저장
 export async function osSaveFileTemp(workbookId: string, fileType: string, fileIndex: number){
   if (DEVICE_DATA.OS === 'BROWSER') {
-    const fileName: string = `web_${fileType}_${fileIndex}.${fileType == 'pdf' ? 'pdf' : 'mp3'}`;
+    const fileName: string = `web_${fileType}_${fileIndex}.${fileType == 'pdf' ? 'pdf' : 'audio'}`;
     const filePath: string = `/static/${workbookId}/${fileName}`;
     
     // 실패 시뮬레이션 (50% 확률로 실패)

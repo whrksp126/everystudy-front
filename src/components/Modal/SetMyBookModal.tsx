@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useModal } from '../../hooks/useModal';
-import { IconArrowLeft, IconUpload, IconNotification, IconPlusSquare, IconCheck, IconX } from '../../assets/Icon';
+import { IconArrowLeft, IconUpload, IconNotification, IconPlusSquare, IconCheck, IconX } from '../../assets/Icon.tsx';
 import { osDeleteTempAll } from '../../utils/osFunction';
 import { useFileSelector } from '../../hooks/useFileSelector';
 import { FileSelectorModal } from '../FileSelectorModal';
@@ -35,7 +35,7 @@ const SetMyBookModal: React.FC<SetMyBookModalProps> = () => {
   const { popModal, closeModal } = useModal();
   const [bookId, setBookId] = useState<string>('new');
   const [title, setTitle] = useState<string>('');
-  const [files, setFiles] = useState<any>({pdfs: [],mp3s: []});
+  const [files, setFiles] = useState<any>({pdfs: [],audios: []});
   const [fileStates, setFileStates] = useState<{[key: string]: 'idle' | 'loading' | 'validation_error' | 'upload_error' | 'success'}>({});
   const [titleState, setTitleState] = useState<'idle' | 'error'>('idle');
 
@@ -74,14 +74,14 @@ const SetMyBookModal: React.FC<SetMyBookModalProps> = () => {
     }
   }, [lastAddedIndex]);
 
-  // 파일 선택 결과 처리 (PDF, MP3 통합)
+  // 파일 선택 결과 처리 (PDF, AUDIO 통합)
   useEffect(() => {
     if (fileSelector.selectedFile && currentFileIndex) {
       const fileData = fileSelector.selectedFile;
       
       setFiles((prevFiles: { [key: string]: any[] }) => {
         const updatedFiles = { ...prevFiles };
-        const fileType = currentFileIndex.type === 'pdf' ? 'pdfs' : 'mp3s';
+        const fileType = currentFileIndex.type === 'pdf' ? 'pdfs' : 'audios';
         const arr = Array.isArray(updatedFiles[fileType]) ? [...updatedFiles[fileType]] : [];
         
         // 선택된 인덱스에 파일 저장
@@ -96,7 +96,7 @@ const SetMyBookModal: React.FC<SetMyBookModalProps> = () => {
             page_count: pdfData.page_count,
             size: pdfData.size
           };
-        } else if (currentFileIndex.type === 'mp3') {
+        } else if (currentFileIndex.type === 'audio') {
           const audioData = fileData as AudioData;
           arr[currentFileIndex.index] = {
             name: audioData.name,
@@ -128,7 +128,7 @@ const SetMyBookModal: React.FC<SetMyBookModalProps> = () => {
       // 1초 후에 실행
       await new Promise(resolve => setTimeout(resolve, 1000));
 
-      if(type === 'pdf' || type === 'mp3'){
+      if(type === 'pdf' || type === 'audio'){
         setCurrentFileIndex({ type, index });
         await fileSelector.openFileSelector(type, index, bookId);
         return;
@@ -374,26 +374,26 @@ const SetMyBookModal: React.FC<SetMyBookModalProps> = () => {
               </>
             )}
 
-            {/* mp3 파일 */}
-            {files.mp3s.length === 0 && (
+            {/* audio 파일 */}
+            {files.audios.length === 0 && (
             <div className="flex gap-[16px] items-center">
               <h3 className="w-[80px] text-16s text-black">MP3 파일</h3>
               <div 
-                onClick={() => handleFileUpload('mp3', 0)}
+                onClick={() => handleFileUpload('audio', 0)}
                 className={`flex items-center gap-[8px] flex-1 h-[58px] p-[20px] border rounded-[10px] text-16m ${
-                  fileStates['mp3_0'] === 'loading'
+                  fileStates['audio_0'] === 'loading'
                     ? 'border-blue-200 bg-blue-25 text-blue-400' 
-                    : fileStates['mp3_0'] === 'upload_error'
+                    : fileStates['audio_0'] === 'upload_error'
                     ? 'border-red-200 bg-red-25 text-red-400'
                     : 'border-gray-75 bg-gray-25 text-gray-400'
                 }`}
               >
-                {fileStates['mp3_0'] === 'loading' ? (
+                {fileStates['audio_0'] === 'loading' ? (
                   <>
                     <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-400"></div>
                     <span className="text-14r">업로드 중...</span>
                   </>
-                ) : fileStates['mp3_0'] === 'upload_error' ? (
+                ) : fileStates['audio_0'] === 'upload_error' ? (
                   <>
                     <IconUpload width={24} height={24} className="text-red-400" />
                     <span className="text-14r text-red-400">파일 업로드 실패, 다시 시도해 주세요.</span>
@@ -408,29 +408,29 @@ const SetMyBookModal: React.FC<SetMyBookModalProps> = () => {
             </div>
             )}
             
-            {files.mp3s.length > 0 && (
+            {files.audios.length > 0 && (
               <>
-              {files.mp3s.map((file: any, index: number) => (
-                <div key={index} id={`mp3_${index}`} className="flex gap-[16px] items-center">
+              {files.audios.map((file: any, index: number) => (
+                <div key={index} id={`audio_${index}`} className="flex gap-[16px] items-center">
                   
                   <h3 className="w-[80px] text-16s text-black">{index === 0 && 'MP3 파일'}</h3>
                   
                   <div 
-                    onClick={() => handleFileUpload('mp3', index)}
+                    onClick={() => handleFileUpload('audio', index)}
                     className={`flex items-center gap-[8px] flex-1 h-[58px] p-[20px] border rounded-[10px] text-16m ${
-                      fileStates[`mp3_${index}`] === 'loading'
+                      fileStates[`audio_${index}`] === 'loading'
                         ? 'border-blue-200 bg-blue-25 text-blue-400' 
-                        : fileStates[`mp3_${index}`] === 'upload_error'
+                        : fileStates[`audio_${index}`] === 'upload_error'
                         ? 'border-red-200 bg-red-25 text-red-400'
                         : 'border-blue-50 bg-blue-25 text-gray-400'
                     }`}
                   >
-                    {fileStates[`mp3_${index}`] === 'loading' ? (
+                    {fileStates[`audio_${index}`] === 'loading' ? (
                       <>
                         <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-400"></div>
                         <span className="text-14r">업로드 중...</span>
                       </>
-                    ) : fileStates[`mp3_${index}`] === 'upload_error' ? (  
+                    ) : fileStates[`audio_${index}`] === 'upload_error' ? (  
                       <>
                         <IconUpload width={24} height={24} className="text-red-400" />
                         <span className="text-14r text-red-400">파일 업로드 실패, 다시 시도해 주세요.</span>
@@ -441,7 +441,7 @@ const SetMyBookModal: React.FC<SetMyBookModalProps> = () => {
                         <span className="flex-1 text-14r text-primary-blue">{file.name}</span>
                         <button onClick={(e) => {
                           e.stopPropagation();
-                          handleFileDelete('mp3', index);
+                          handleFileDelete('audio', index);
                         }}>
                           <IconX width={24} height={24} className="text-gray-600" />
                         </button>
@@ -454,21 +454,21 @@ const SetMyBookModal: React.FC<SetMyBookModalProps> = () => {
               <div className="flex gap-[16px] items-center">
                 <h3 className="w-[80px] text-16s text-black"></h3>
                 <div 
-                  onClick={() => handleFileUpload('mp3', files.mp3s.length)}
+                  onClick={() => handleFileUpload('audio', files.audios.length)}
                   className={`flex items-center gap-[8px] flex-1 h-[58px] p-[20px] border rounded-[10px] text-16m ${
-                    fileStates[`mp3_${files.mp3s.length}`] === 'loading'
+                    fileStates[`audio_${files.audios.length}`] === 'loading'
                       ? 'border-blue-200 bg-blue-25 text-blue-400' 
-                      : fileStates[`mp3_${files.mp3s.length}`] === 'upload_error'
+                      : fileStates[`audio_${files.audios.length}`] === 'upload_error'
                       ? 'border-red-200 bg-red-25 text-red-400'
                       : 'border-gray-75 bg-gray-25 text-gray-400'
                   }`}
                 >
-                  {fileStates[`mp3_${files.mp3s.length}`] === 'loading' ? (
+                  {fileStates[`audio_${files.audios.length}`] === 'loading' ? (
                     <>
                       <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-400"></div>
                       <span className="text-14r">업로드 중...</span>
                     </>
-                  ) : fileStates[`mp3_${files.mp3s.length}`] === 'upload_error' ? (
+                  ) : fileStates[`audio_${files.audios.length}`] === 'upload_error' ? (
                     <>
                       <IconUpload width={24} height={24} className="text-red-400" />
                       <span className="text-14r text-red-400">파일 업로드 실패, 다시 시도해 주세요.</span>
@@ -500,7 +500,7 @@ const SetMyBookModal: React.FC<SetMyBookModalProps> = () => {
         </button>
       </div>
 
-      {/* 파일 선택 모달 (PDF/MP3 통합) */}
+      {/* 파일 선택 모달 (PDF/AUDIO 통합) */}
       <FileSelectorModal
         isOpen={fileSelector.isOpen}
         labelText="파일을 선택해주세요"
@@ -509,7 +509,7 @@ const SetMyBookModal: React.FC<SetMyBookModalProps> = () => {
           resetFileUploadStates();
         }}
         onFileSelect={(file) => fileSelector.handleFileSelect(file, currentFileIndex?.type || 'pdf')}
-        accept={currentFileIndex?.type === 'mp3' ? "audio/*" : "application/pdf"}
+        accept={currentFileIndex?.type === 'audio' ? "audio/*" : "application/pdf"}
       />
 
     </div>

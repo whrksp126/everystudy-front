@@ -1,7 +1,6 @@
 import { SERVER_URL } from "../utils/server";
-import { DEVICE_DATA } from "../utils/osFunction";
 import { fetchDataAsync } from "../utils/common";
-
+import { getDeviceId } from "../utils/localStorage";
 // my 교재 데이터 저장
 
 
@@ -9,7 +8,7 @@ export const saveMyBookStandardDatafetch = async (title: string, bookId: string,
   // 성공 시 처리 로직
   const url = `${SERVER_URL}/pdf_viewer/register_viewer_files`;
   const method = 'POST';
-  const { pdfs: pdfList, mp3s: audioList } = files;
+  const { pdfs: pdfList, audios: audioList } = files;
   
   const form_data: {key: string, value: Blob}[] = [];
   pdfList.forEach((d, i) => {
@@ -22,7 +21,7 @@ export const saveMyBookStandardDatafetch = async (title: string, bookId: string,
     json_data: {
       workbook_name : title, // 문제집 명
       workbook_id : bookId, // 문제집 id
-      device_id : DEVICE_DATA.ID, // 사용자 기기 타입
+      device_id : getDeviceId(), // 사용자 기기 타입
 
       file_path: {
         pdf: pdfList.map(({ file_id, name, path, page_count, size }: {file_id: string, name: string, path: string, page_count: number, size: {mw: number, mh: number}}, index: number) => ({
@@ -45,6 +44,7 @@ export const saveMyBookStandardDatafetch = async (title: string, bookId: string,
     form_data,
   };
   
+  console.log('fetchData', fetchData);
   try{
     return await fetchDataAsync(url, method, fetchData, true);
   }catch(error){
@@ -59,7 +59,7 @@ export const editMyBookStandardDatafetch = async (title: string, bookId: string,
   // 성공 시 처리 로직
   const url = `${SERVER_URL}/pdf_viewer/update_viewer_files`;
   const method = 'PATCH';
-  const { pdfs: pdfList, mp3s: audioList } = files;
+  const { pdfs: pdfList, audios: audioList } = files;
   
   const form_data: {key: string, value: Blob}[] = [];
   pdfList.forEach((d, i) => {

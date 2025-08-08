@@ -130,7 +130,7 @@ export const useFileSelector = (): UseFileSelectorReturn => {
             page_count: pdfData.total_page,
             size: pdfData.size
           });
-        } else if (type === 'mp3') {
+        } else if (type === 'audio') {
           const audioData = await getAppAudioFileData({filePath, fileName});
           setSelectedFile({
             name: audioData.user_file_name,
@@ -162,7 +162,7 @@ export const useFileSelector = (): UseFileSelectorReturn => {
       
       if (type === 'pdf') {
         fileData = await processPdfFile(file);
-      } else if (type === 'mp3') {
+      } else if (type === 'audio') {
         fileData = await processAudioFile(file);
       } else {
         throw new Error('지원하지 않는 파일 타입입니다.');
