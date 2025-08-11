@@ -19,7 +19,7 @@ export const AlertProvider: React.FC = () => {
         return (
           <div
             key={alert.id}
-            className={`absolute inset-0 flex items-center justify-center ${
+            className={`absolute inset-0 flex items-center justify-center p-[17px] ${
               index === activeIndex ? 'block' : 'hidden'
             }`}
           >

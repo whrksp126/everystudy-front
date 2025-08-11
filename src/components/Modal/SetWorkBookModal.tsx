@@ -156,7 +156,7 @@ const SetWorkBookModal: React.FC<{item: any}> = ({item}) => {
 
   return (
     <div className="
-      w-full max-w-[712px] max-h-[600px] pb-[32px] rounded-[13px] bg-white shadow-xl overflow-hidden
+      w-full max-w-[712px] max-h-[600px] h-full pb-[32px] rounded-[13px] bg-white shadow-xl overflow-hidden
       max-sm:max-w-full max-sm:max-h-full max-sm:w-full max-sm:h-full max-sm:rounded-none
     ">
       {/* 헤더 */}
@@ -167,18 +167,28 @@ const SetWorkBookModal: React.FC<{item: any}> = ({item}) => {
         >
           <IconArrowLeft width={32} height={32} className="text-gray-400" />
         </button>
-        <h2 className="absolute left-1/2 -translate-x-1/2 text-20b text-gray-800">
+        <h2 className="
+          absolute left-1/2 -translate-x-1/2 text-20b text-gray-800
+          max-sm:hidden
+        ">
           직접 교재를 등록해보세요
         </h2>
       </div>
       {/* 메인 */}
       <div className="
-        flex flex-col gap-[20px] flex-1 max-h-[calc(600px-64px-84px)] py-[24px] overflow-y-auto
-        max-sm:max-h-[calc(100vh-64px-84px)] max-sm:h-full
+        flex flex-col gap-[24px] flex-1 max-h-[calc(600px-64px-84px)] h-full overflow-y-auto 
+        max-sm:gap-[0px] max-sm:max-h-[calc(100vh-64px-84px)] max-sm:h-full max-sm:px-[0px] max-sm:py-[0px] max-sm:pb-[40px]
       ">
+        {/* 모바일 헤더 */}
+        <div className="px-[20px] py-[15px] hidden max-sm:flex">
+          <h2 className="text-20b text-gray-800 hidden max-sm:block">직접 교재를 등록해보세요</h2>
+        </div>
 
-        <div className="px-[32px]">
-          <div className="flex gap-[24px] px-[20px] py-[16px]  rounded-[10px] bg-gray-25">
+        <div className="px-[32px] max-sm:px-[16px] max-sm:mb-[32px]">
+          <div className="
+            flex gap-[24px] px-[20px] py-[16px]  rounded-[10px] bg-gray-25
+            max-sm:flex-col max-sm:items-start
+            ">
             {/* 썸네일 */}
             <div>
               <img src={workBook.image} alt="교재 썸네일" className="w-[120px] h-[160px] rounded-[10px]" />
@@ -219,12 +229,18 @@ const SetWorkBookModal: React.FC<{item: any}> = ({item}) => {
           </div>
         </div>
 
-        <div className="flex gap-[16px] px-[32px]">
+        <div className="
+          flex gap-[16px] px-[32px] 
+          max-sm:flex-col max-sm:items-start max-sm:px-[16px]
+        ">
           {files.pdfs.map((file: any, index: number) => (
             
           <div 
             onClick={() => handleFileUpload('pdf', index, workBook.id)}
-            key={`pdf-${index}`} className="flex flex-col flex-1 gap-[12px]">
+            key={`pdf-${index}`} className="
+              flex flex-col flex-1 gap-[12px]
+              max-sm:w-full
+            ">
             <h3 className="text-16s text-black">{file.title}</h3>
 
             <div className={`
@@ -240,6 +256,8 @@ const SetWorkBookModal: React.FC<{item: any}> = ({item}) => {
                   ? 'border-red-200 bg-red-25 text-red-400'
                   : 'border-gray-75 bg-gray-25 text-gray-400'
               }
+
+              max-sm:min-h-[58px] max-sm:h-[58px] max-sm:flex-row max-sm:justify-start
             `}>
                 {fileStates[`pdf_${index}`] === 'loading' ? (
                   <>
@@ -248,19 +266,23 @@ const SetWorkBookModal: React.FC<{item: any}> = ({item}) => {
                   </>
                 ) : fileStates[`pdf_${index}`] === 'validation_error' ? (
                   <>
-                    <IconUpload width={32} height={32} className="text-red-400" />
-                    <span className="text-center text-16r text-red-400">PDF 파일을<br />업로드 해주세요.</span>
+                    <IconUpload width={32} height={32} className="text-red-400 max-sm:hidden" />
+                    <span className="text-center text-16r text-red-400 max-sm:hidden">PDF 파일을<br />업로드 해주세요.</span>
+                    <IconUpload width={24} height={24} className="text-red-400 hidden max-sm:block" />
+                    <span className="text-center text-16r text-red-400 hidden max-sm:block">PDF 파일을 업로드 해주세요.</span>
                   </>
                 ) : fileStates[`pdf_${index}`] === 'upload_error' ? (
                   <>
-                    <IconUpload width={32} height={32} className="text-red-400" />
-                    <span className="text-center text-16r text-red-400">파일 업로드 실패<br />다시 시도해 주세요.</span>
+                    <IconUpload width={32} height={32} className="text-red-400 max-sm:hidden" />
+                    <span className="text-center text-16r text-red-400 max-sm:hidden">파일 업로드 실패<br />다시 시도해 주세요.</span>
+                    <IconUpload width={24} height={24} className="text-red-400 hidden max-sm:block" />
+                    <span className="text-center text-16r text-red-400 hidden max-sm:block">파일 업로드 실패<br />다시 시도해 주세요.</span>
                   </>
                 ) : fileStates[`pdf_${index}`] === 'success' ? (
                   <>
                     <span className="text-center text-16r">{file.name}</span>
                     <button 
-                      className="absolute top-[12px] right-[12px]"
+                      className="absolute top-[12px] right-[12px] max-sm:top-[50%] max-sm:translate-y-[-50%]"
                       onClick={(e) => {
                         e.stopPropagation();
                         handleFileDelete('pdf', index);
@@ -271,8 +293,10 @@ const SetWorkBookModal: React.FC<{item: any}> = ({item}) => {
                   </>
                 ) : (
                   <>
-                    <IconUpload width={32} height={32} className="text-gray-200" />
-                    <span className="text-center text-16r text-gray-400">PDF 파일을<br />업로드 해주세요.</span>
+                    <IconUpload width={32} height={32} className="text-gray-200 max-sm:hidden" />
+                    <span className="text-center text-16r text-gray-400 max-sm:hidden">PDF 파일을<br />업로드 해주세요.</span>
+                    <IconUpload width={24} height={24} className="text-gray-200 hidden max-sm:block hidden" />
+                    <span className="text-center text-16r text-gray-400 hidden max-sm:block">PDF 파일을 업로드 해주세요.</span>
                   </>
                 )}
             </div>
@@ -281,7 +305,10 @@ const SetWorkBookModal: React.FC<{item: any}> = ({item}) => {
           {files.audios.map((file: any, index: number) => (
           <div 
             onClick={() => handleFileUpload('audio', index, workBook.id)}
-            key={`audio-${index}`} className="flex flex-col flex-1 gap-[16px]">
+            key={`audio-${index}`} className="
+              flex flex-col flex-1 gap-[12px]
+              max-sm:w-full
+            ">
             <h3 className="text-16s text-black">{file.title}</h3>
             <div className={`
               relative
@@ -296,7 +323,9 @@ const SetWorkBookModal: React.FC<{item: any}> = ({item}) => {
                   ? 'border-red-200 bg-red-25 text-red-400'
                   : 'border-gray-75 bg-gray-25 text-gray-400'
                 }
+              max-sm:min-h-[58px] max-sm:h-[58px] max-sm:flex-row max-sm:justify-start
               `}
+              
               >
                 {fileStates[`audio_${index}`] === 'loading' ? (
                   <>
@@ -305,19 +334,23 @@ const SetWorkBookModal: React.FC<{item: any}> = ({item}) => {
                   </>
                 ) : fileStates[`audio_${index}`] === 'validation_error' ? (
                   <>
-                    <IconUpload width={32} height={32} className="text-red-400" />
-                    <span className="text-center text-16r text-red-400">MP3 파일을<br />업로드 해주세요.</span>
+                    <IconUpload width={32} height={32} className="text-red-400 max-sm:hidden" />
+                    <span className="text-center text-16r text-red-400 max-sm:hidden">MP3 파일을<br />업로드 해주세요.</span>
+                    <IconUpload width={24} height={24} className="text-red-400 hidden max-sm:block" />
+                    <span className="text-center text-16r text-red-400 hidden max-sm:block">MP3 파일을 업로드 해주세요.</span>
                   </>
                 ) : fileStates[`audio_${index}`] === 'upload_error' ? (
                   <>
-                    <IconUpload width={32} height={32} className="text-red-400" />
-                    <span className="text-center text-16r text-red-400">파일 업로드 실패<br />다시 시도해 주세요.</span>
+                    <IconUpload width={32} height={32} className="text-red-400 max-sm:hidden" />
+                    <span className="text-center text-16r text-red-400 max-sm:hidden">파일 업로드 실패<br />다시 시도해 주세요.</span>
+                    <IconUpload width={24} height={24} className="text-red-400 hidden max-sm:block" />
+                    <span className="text-center text-16r text-red-400 hidden max-sm:block">파일 업로드 실패<br />다시 시도해 주세요.</span>
                   </>
                 ) : fileStates[`audio_${index}`] === 'success' ? (
                   <>
                     <span className="text-center text-16r">{file.name}</span>
                     <button 
-                      className="absolute top-[12px] right-[12px]"
+                      className="absolute top-[12px] right-[12px] max-sm:top-[50%] max-sm:translate-y-[-50%]"
                       onClick={(e) => {
                         e.stopPropagation();
                         handleFileDelete('audio', index);
@@ -328,8 +361,10 @@ const SetWorkBookModal: React.FC<{item: any}> = ({item}) => {
                   </>
                 ) : (
                   <>
-                    <IconUpload width={32} height={32} className="text-gray-200" />
-                    <span className="text-center text-16r text-gray-400">MP3 파일을<br />업로드 해주세요.</span>
+                    <IconUpload width={32} height={32} className="text-gray-200 max-sm:hidden" />
+                    <span className="text-center text-16r text-gray-400 max-sm:hidden">MP3 파일을<br />업로드 해주세요.</span>
+                    <IconUpload width={24} height={24} className="text-gray-200 hidden max-sm:block" />
+                    <span className="text-center text-16r text-gray-400 hidden max-sm:block">MP3 파일을 업로드 해주세요.</span>
                   </>
                 )}
             </div>       
@@ -337,10 +372,13 @@ const SetWorkBookModal: React.FC<{item: any}> = ({item}) => {
           ))}
         </div>
       </div>
-      <div className="flex items-center justify-center">
+      <div className="flex items-center justify-center px-[20px]">
         <button 
           onClick={handleSave}
-          className="w-[240px] h-[52px] rounded-[8px] bg-primary-purple text-16s text-white"
+          className="
+            max-w-[240px] w-full h-[52px] px-[20px] rounded-[8px] bg-primary-purple text-16s text-white
+            max-sm:max-w-[100%]
+          "
         >등록하기</button>
       </div>
 

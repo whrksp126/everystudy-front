@@ -34,14 +34,13 @@ interface SetMyBookModalProps {
 const SetMyBookModal: React.FC<SetMyBookModalProps> = () => {
   const { popModal, closeModal } = useModal();
   const [bookId, setBookId] = useState<string>('new');
-  const [title, setTitle] = useState<string>('');
   const [files, setFiles] = useState<any>({pdfs: [],audios: []});
   const [fileStates, setFileStates] = useState<{[key: string]: 'idle' | 'loading' | 'validation_error' | 'upload_error' | 'success'}>({});
   const [titleState, setTitleState] = useState<'idle' | 'error'>('idle');
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [lastAddedIndex, setLastAddedIndex] = useState<{type: string, index: number} | null>(null);
-
+  const titleInputRef = useRef<HTMLInputElement>(null); 
   // 통합 파일 선택 훅 사용
   const fileSelector = useFileSelector();
   
@@ -153,8 +152,8 @@ const SetMyBookModal: React.FC<SetMyBookModalProps> = () => {
     setTitleState('idle');
     
     let hasError = false;
-    
-    if(title.trim() === ""){
+    const title = titleInputRef.current?.value.trim();
+    if (title === "") {
       setTitleState('error');
       hasError = true;
       
@@ -260,36 +259,48 @@ const SetMyBookModal: React.FC<SetMyBookModalProps> = () => {
           flex flex-col gap-[24px]
           max-sm:px-[16px] max-sm:pt-[20px]
         ">
-          <div className="flex flex-col gap-[24px]">
-            <div className="flex gap-[16px] items-center">
-              <h3 className="w-[80px] text-16s text-black">교재명</h3>
-              <input 
-                type="text" 
-                placeholder="교재명을 입력해주세요."
-                className={`flex-1 h-[58px] pl-[16px] pr-[12px] border rounded-[10px] text-16m ${
-                  titleState === 'error'
-                    ? 'border-red-200 bg-red-25 text-red-400 placeholder:text-red-400' 
-                    : 'border-[#0000000a] bg-gray-50'
-                }`}
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-              />
-            </div>
+          <div className="
+            flex gap-[16px] items-center w-full
+            max-sm:flex max-sm:flex-col max-sm:items-start
+          ">
+            <h3 className="w-[80px] text-16s text-black">교재명</h3>
+            <input 
+              id="book-title"
+              name="book-title"
+              type="text" 
+              placeholder="교재명을 입력해주세요."
+              size={1}
+              className={`flex-1 w-full h-[58px] pl-[16px] pr-[12px] border rounded-[10px] text-16m ${
+                titleState === 'error'
+                  ? 'border-red-200 bg-red-25 text-red-400 placeholder:text-red-400' 
+                  : 'border-[#0000000a] bg-gray-50 text-gray-200'
+                }
+                max-sm:flex-none
+              `}
+              defaultValue=""
+              ref={titleInputRef}
+            />
+
+
           </div>
           <div className="flex flex-col gap-[12px]">
             {/* PDF 파일 */}
             {files.pdfs.length === 0 && (
-            <div className="flex gap-[16px] items-center">
+            <div className="
+              flex gap-[16px] items-center
+              max-sm:flex-col max-sm:items-start
+            ">
               <h3 className="w-[80px] text-16s text-black">PDF 파일</h3>
               <div 
                 onClick={() => handleFileUpload('pdf', 0)}
-                className={`flex items-center gap-[8px] flex-1 h-[58px] p-[20px] border rounded-[10px] text-16m ${
+                className={`flex items-center gap-[8px] flex-1 w-full h-[58px] p-[20px] border rounded-[10px] text-16m ${
                   fileStates['pdf_0'] === 'loading'
                     ? 'border-blue-200 bg-blue-25 text-blue-400' 
                     : fileStates['pdf_0'] === 'validation_error' || fileStates['pdf_0'] === 'upload_error'
                     ? 'border-red-200 bg-red-25 text-red-400'
                     : 'border-gray-75 bg-gray-25 text-gray-400'
-                }`}
+                  }
+                `}
               >
                 {fileStates['pdf_0'] === 'loading' ? (
                   <>
@@ -319,7 +330,14 @@ const SetMyBookModal: React.FC<SetMyBookModalProps> = () => {
             {files.pdfs.length > 0 && (
               <>
               {files.pdfs.map((file: any, index: number) => (
-                <div key={index} id={`pdf_${index}`} className="flex gap-[16px] items-center">
+                <div 
+                  key={index} 
+                  id={`pdf_${index}`} 
+                  className="
+                    flex gap-[16px] items-center w-full
+                    max-sm:flex max-sm:flex-col max-sm:items-start
+                  "
+                >
                   
                   <h3 className="w-[80px] text-16s text-black">{index === 0 && 'PDF 파일'}</h3>
                   
@@ -394,7 +412,10 @@ const SetMyBookModal: React.FC<SetMyBookModalProps> = () => {
 
             {/* audio 파일 */}
             {files.audios.length === 0 && (
-            <div className="flex gap-[16px] items-center">
+            <div className="
+              flex gap-[16px] items-center
+              max-sm:flex-col max-sm:items-start
+            ">
               <h3 className="w-[80px] text-16s text-black">MP3 파일</h3>
               <div 
                 onClick={() => handleFileUpload('audio', 0)}
@@ -404,7 +425,9 @@ const SetMyBookModal: React.FC<SetMyBookModalProps> = () => {
                     : fileStates['audio_0'] === 'upload_error'
                     ? 'border-red-200 bg-red-25 text-red-400'
                     : 'border-gray-75 bg-gray-25 text-gray-400'
-                }`}
+                  }
+                  max-sm:w-full
+                `}
               >
                 {fileStates['audio_0'] === 'loading' ? (
                   <>
@@ -429,7 +452,10 @@ const SetMyBookModal: React.FC<SetMyBookModalProps> = () => {
             {files.audios.length > 0 && (
               <>
               {files.audios.map((file: any, index: number) => (
-                <div key={index} id={`audio_${index}`} className="flex gap-[16px] items-center">
+                <div key={index} id={`audio_${index}`} className="
+                  flex gap-[16px] items-center
+                  max-sm:flex-col max-sm:items-start
+                ">
                   
                   <h3 className="w-[80px] text-16s text-black">{index === 0 && 'MP3 파일'}</h3>
                   
@@ -512,10 +538,13 @@ const SetMyBookModal: React.FC<SetMyBookModalProps> = () => {
           <span className="text-14r text-primary-purple">신규 교재 등록이 완료되면 푸시알림으로 알려드려요. 등록이 완료되기 전에도 파일뷰어 기능은 사용할 수 있어요.</span>
         </div>
       </div>
-      <div className="flex items-center justify-center h-[64px]">
+      <div className="flex items-center justify-center h-[64px] px-[20px]">
         <button 
           onClick={handleSaveFiles}
-          className="w-[240px] h-[52px] rounded-[8px] bg-primary-purple text-16s text-white"
+          className="
+            max-w-[240px] w-full h-[52px] px-[20px] rounded-[8px] bg-primary-purple text-16s text-white
+            max-sm:max-w-[100%]
+          "
         >
           등록하기
         </button>

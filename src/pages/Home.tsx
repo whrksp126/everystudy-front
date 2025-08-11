@@ -112,7 +112,10 @@ const Home: React.FC = () => {
         .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
     } else if(option === '제목순'){
       return sortItems
-        .sort((a, b) => a.title.localeCompare(b.title))
+        .sort((a, b) => {
+          const getName = (item) => item.type === 'folder' ? item.name : item.title;
+          return getName(a).localeCompare(getName(b));
+        })
     }
   };
   
@@ -212,7 +215,7 @@ const Home: React.FC = () => {
           " />
           {/* 모바일 더보기 버튼*/}
           <button className="
-            flex items-center gap-[6px] h-[40px] px-[14px] rounded-[6px] bg-gray-50 hidden
+            flex items-center gap-[6px] rounded-[6px] bg-gray-50 hidden
             max-sm:flex
           ">
             <IconMenu width="24" height="24" className="text-black" />
