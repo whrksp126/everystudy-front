@@ -9,6 +9,7 @@ import { useModal } from '../hooks/useModal'
 import BookSearchModal from '../components/Modal/BookSearchModal';
 import { useData } from '../contexts/DataContext';
 import SetFolderModal from '../components/Modal/SetFolderModal';
+
 import {getFolderSvg} from '../utils/folderSvg';
 import { 
   IconPlus, 
@@ -25,6 +26,69 @@ import {
   IconArrowLeft7,
   IconMenu,
 } from '../assets/Icon.tsx';
+import { moveFolderfetch } from '../api/myDocs.ts';
+
+// ---------------- Helper Types/Functions ----------------
+type TreeItem = any;
+
+// 폴더 아이템 찾기
+const findParentFolderId = (items: TreeItem[], targetId: string, parentId: string | null = null): string | null => {
+  for (const it of items || []) {
+    if (it.id === targetId) return parentId;
+    if (it.type === 'folder' && Array.isArray(it.items)) {
+      const found = findParentFolderId(it.items, targetId, it.id);
+      if (found !== null) return found;
+    }
+  }
+  return null;
+};
+
+
+// 현재 폴더 아이디 조회
+const getCurrentFolderIdFromPath = (folderPath: string[]): string | null => (
+  folderPath.length > 0 ? folderPath[folderPath.length - 1] : null
+);
+
+type MoveIntent = { itemId: string; fromFolderId: string | null; toFolderId: string | null } | null;
+
+// 이동 의도 계산
+const computeMoveIntent = (
+  root: TreeItem[] | null | undefined,
+  folderPath: string[],
+  activeItemSafe: any,
+  overItemSafe: any
+): MoveIntent => {
+  console.log('root', root);
+  console.log('folderPath', folderPath);
+  console.log('activeItemSafe', activeItemSafe);
+  console.log('overItemSafe', overItemSafe);
+  if (!Array.isArray(root)) return null;
+  const sourceId: string | undefined = activeItemSafe?.item?.id ?? activeItemSafe?.id ?? activeItemSafe?.item_id;
+  if (!sourceId) return null;
+
+  const fromFolderId = findParentFolderId(root, sourceId, null);
+  const toFolderId = overItemSafe?.item?.type === 'folder'
+    ? (overItemSafe.item.id as string)
+    : getCurrentFolderIdFromPath(folderPath);
+
+  console.log('fromFolderId', fromFolderId);
+  console.log('toFolderId', toFolderId);
+
+  // 자기 자신 폴더에 드롭하는 경우는 null 반환
+  if (
+    overItemSafe?.item?.type === 'folder' &&
+    (overItemSafe.item.id === sourceId)
+  ) {
+    return null;
+  }
+
+  if (fromFolderId === toFolderId) return null;
+  return { itemId: sourceId, fromFolderId, toFolderId };
+};
+
+// DnD/UX 지연값 상수 (한 곳에서 관리)
+const DRAG_ACTIVATION_DELAY_MS = 1000; // 롱프레스 시간
+const HOVER_ENTER_MS = 2000; // 폴더/뒤로가기 진입 대기 시간
 
 const sortOptions = [
   '최근 등록순',
@@ -50,9 +114,10 @@ const Home: React.FC = () => {
 
 
   const { 
-    myDocsLoaded, getMyDocs, myDocs,
+    myDocsLoaded, getMyDocs, myDocs, setUpdateMyDocsFolderMove,
     vocabsLoaded, getVocabs,
     reviewNotesLoaded, getReviewNotes,
+    
   } = useData();
 
 
@@ -172,7 +237,6 @@ const Home: React.FC = () => {
   const findFolderName = (folderPath: string[]) => {
     let currentItems = getMyDocs();
     let folderName = '';
-    console.log("folderPath", folderPath);
     for (const folderId of folderPath) {
       const foundFolder = currentItems.find((item: any) => item.type === 'folder' && item.id === folderId);
       if (foundFolder) {
@@ -183,7 +247,6 @@ const Home: React.FC = () => {
         break;
       }
     }
-    console.log("folderName,.", folderName);
     return folderName;
   }
 
@@ -202,19 +265,110 @@ const Home: React.FC = () => {
     };
   }, []);
 
-  // DragOverlay 렌더용 활성 아이템 상태
+  // DragOverlay 렌더 대상 및 hover 감지 상태/타이머
   const [activeDragItem, setActiveDragItem] = useState<any | null>(null);
-  // 폴더 hover 유지 감지 (1초 이상)
   const [overFolderId, setOverFolderId] = useState<string | null>(null);
   const hoverTimeoutRef = useRef<number | null>(null);
-  const clearHoverTimer = () => {
+  const backHoverTimeoutRef = useRef<number | null>(null);
+  // 드래그 세션 동안 초기 선택/마지막 over 대상 유지 (리렌더로 e.over가 사라지는 경우 대비)
+  const activeDragDataRef = useRef<any | null>(null);
+  const lastOverRef = useRef<{ id: string | undefined; data: any } | null>(null);
+
+  // 타이머 정리 유틸
+  const clearHoverTimer = useCallback(() => {
     if (hoverTimeoutRef.current) {
       window.clearTimeout(hoverTimeoutRef.current);
       hoverTimeoutRef.current = null;
     }
-  };
-  // 뒤로가기 hover 타이머
-  const backHoverTimeoutRef = useRef<number | null>(null);
+  }, []);
+
+  // 뒤로가기 타이머 정리
+  const clearBackHoverTimer = useCallback(() => {
+    if (backHoverTimeoutRef.current) {
+      window.clearTimeout(backHoverTimeoutRef.current);
+      backHoverTimeoutRef.current = null;
+    }
+  }, []);
+
+  // 진입 동작 큐잉
+  const queueFolderEnter = useCallback((folderId: string) => {
+    if (overFolderId === folderId) return;
+    setOverFolderId(folderId);
+    clearHoverTimer();
+    hoverTimeoutRef.current = window.setTimeout(() => {
+      setFolderPath(prev => [...prev, folderId]);
+      setOverFolderId(null);
+      clearHoverTimer();
+    }, HOVER_ENTER_MS);
+  }, [overFolderId, clearHoverTimer]);
+
+  // 뒤로가기 타이머 정리
+  const queueBackEnter = useCallback(() => {
+    if (folderPath.length === 0 || backHoverTimeoutRef.current) return;
+    clearHoverTimer();
+    backHoverTimeoutRef.current = window.setTimeout(() => {
+      setFolderPath(prev => prev.slice(0, prev.length - 1));
+      clearBackHoverTimer();
+    }, HOVER_ENTER_MS);
+  }, [folderPath.length, clearBackHoverTimer, clearHoverTimer]);
+
+  // DnD 이벤트 핸들러
+  const handleDragStart = useCallback((e: DragStartEvent) => {
+    const data: any = e.active.data.current;
+    setActiveDragItem(data?.item || null);
+    activeDragDataRef.current = data?.item || null;
+  }, []);
+
+  // 드래그 오버 이벤트 핸들러
+  const handleDragOver = useCallback(async (e: DragOverEvent) => {
+    const overId = e.over?.id as string | undefined;
+    const overData: any = e.over?.data?.current;
+    // 마지막 over 대상 저장 (리렌더로 e.over가 순간적으로 없어지는 케이스 대비)
+    lastOverRef.current = { id: overId, data: overData };
+
+    // 1) 뒤로가기 우선 처리
+    if (overId === 'back-area') {
+      queueBackEnter();
+      return;
+    }
+
+    // 2) 뒤로가기 타이머 정리
+    clearBackHoverTimer();
+
+    // 3) 폴더 진입 처리
+    if (overData?.item?.type === 'folder') {
+      queueFolderEnter(overData.item.id);
+      return;
+    }
+    // 4) 기타 영역: 모든 타이머 정리
+    setOverFolderId(null);
+    clearHoverTimer();
+  }, [queueBackEnter, clearBackHoverTimer, queueFolderEnter, clearHoverTimer]);
+
+  // 드래그 종료 이벤트 핸들러
+  const handleDragEnd = useCallback(async (e: DragEndEvent) => {
+    setActiveDragItem(null);
+    setOverFolderId(null);
+    clearHoverTimer();
+    clearBackHoverTimer();
+    const activeItemSafe = activeDragDataRef.current ?? e.active?.data?.current ?? null;
+    const overItemSafe = lastOverRef.current?.data ?? e.over?.data?.current ?? null;
+    activeDragDataRef.current = null;
+    lastOverRef.current = null;
+    const intent = computeMoveIntent(getMyDocs(), folderPath, activeItemSafe, overItemSafe);
+    if (!intent) {
+      console.log('no-op: same parent or invalid intent');
+      return;
+    }
+
+    try{
+      await moveFolderfetch({ itemId: intent.itemId, toFolderId: intent.toFolderId});
+      setUpdateMyDocsFolderMove({...intent})
+    }catch(error){
+      console.error(error);
+    }
+
+  }, [clearBackHoverTimer, clearHoverTimer, folderPath, getMyDocs]);
 
   return (
     <div className="flex flex-col">
@@ -383,71 +537,12 @@ const Home: React.FC = () => {
       {/* Main */}
       <DndContext
         sensors={useSensors(
-          useSensor(MouseSensor, { activationConstraint: { delay: 1000, tolerance: 5 } }),
-          useSensor(TouchSensor, { activationConstraint: { delay: 1000, tolerance: 5 } })
+          useSensor(MouseSensor, { activationConstraint: { delay: DRAG_ACTIVATION_DELAY_MS, tolerance: 5 } }),
+          useSensor(TouchSensor, { activationConstraint: { delay: DRAG_ACTIVATION_DELAY_MS, tolerance: 5 } })
         )}
-        onDragStart={(e: DragStartEvent) => {
-          const data: any = e.active.data.current;
-          console.log('[drag start] id:', e.active.id, 'item:', data?.item);
-          setActiveDragItem(data?.item || null);
-        }}
-        onDragOver={(e: DragOverEvent) => {
-          const overData: any = e.over?.data?.current;
-          if (overData) {
-            console.log('[drag over] overId:', e.over?.id, 'overItem:', overData.item);
-            // 폴더 위 3초 머무름 → 자동 진입
-            const isFolder = overData.item?.type === 'folder';
-            const currentFolderId = isFolder ? overData.item.id : null;
-            if (isFolder) {
-              // 뒤로가기 타이머는 취소
-              if (backHoverTimeoutRef.current) {
-                window.clearTimeout(backHoverTimeoutRef.current);
-                backHoverTimeoutRef.current = null;
-              }
-              if (overFolderId !== currentFolderId) {
-                setOverFolderId(currentFolderId);
-                clearHoverTimer();
-                hoverTimeoutRef.current = window.setTimeout(() => {
-                  console.log('[hover 3s] folderId:', currentFolderId, overData.item, '→ enter folder');
-                  setFolderPath((prev) => [...prev, currentFolderId]);
-                  setOverFolderId(null);
-                  clearHoverTimer();
-                }, 3000);
-              }
-            } else {
-              setOverFolderId(null);
-              clearHoverTimer();
-            }
-          } else if (e.over?.id === 'back-area') {
-            // 뒤로가기 버튼 위 3초 유지 → 상위 폴더로 나가기
-            setOverFolderId(null);
-            clearHoverTimer();
-            if (folderPath.length > 0 && !backHoverTimeoutRef.current) {
-              backHoverTimeoutRef.current = window.setTimeout(() => {
-                console.log('[hover 3s] back-area → go parent');
-                setFolderPath((prev) => prev.slice(0, prev.length - 1));
-                if (backHoverTimeoutRef.current) {
-                  window.clearTimeout(backHoverTimeoutRef.current);
-                  backHoverTimeoutRef.current = null;
-                }
-              }, 3000);
-            }
-          } else {
-            // 아무 곳도 아니거나 다른 요소 → 타이머 초기화
-            if (backHoverTimeoutRef.current) {
-              window.clearTimeout(backHoverTimeoutRef.current);
-              backHoverTimeoutRef.current = null;
-            }
-          }
-        }}
-        onDragEnd={(e: DragEndEvent) => {
-          const activeData: any = e.active.data.current;
-          const overData: any = e.over?.data?.current;
-          console.log('[drag end] activeId:', e.active.id, 'activeItem:', activeData?.item, 'droppedOn:', e.over?.id, 'overItem:', overData?.item);
-          setActiveDragItem(null);
-          setOverFolderId(null);
-          clearHoverTimer();
-        }}
+        onDragStart={handleDragStart}
+        onDragOver={handleDragOver}
+        onDragEnd={handleDragEnd}
       >
       <div className="
         flex flex-col gap-[32px] px-[60px] py-[24px] bg-white
@@ -464,9 +559,7 @@ const Home: React.FC = () => {
           ">
             <div className="flex items-center gap-[8px]">
               {folderPath.length > 0 && (
-              <button onClick={handleClickBackFolder}>
-                <IconArrowLeft7 width="32" height="32" className="text-black" />
-              </button>
+              <BackDroppable onClick={handleClickBackFolder} />
               )}
               <h2 className="text-20b text-black">
                 {folderPath.length > 0 ? findFolderName(folderPath) : '내 교재'}
@@ -611,7 +704,7 @@ const Home: React.FC = () => {
           <DragOverlay>
             {activeDragItem ? (
               viewMode === 'category' ? (
-                <div className="pointer-events-none flex flex-col gap-[12px] w-[160px] h-[264px] border border-gray-200 rounded-[8px] p-[10px] bg-white shadow-lg">
+                <div className="pointer-events-none flex flex-col gap-[12px] w-[160px] h-[264px] border border-gray-200/60 rounded-[8px] p-[10px] bg-white/70 shadow-xl opacity-70 transform origin-center scale-50">
                   <div className="flex items-center justify-center w-full h-[180px]">
                     {activeDragItem.type === 'folder' ? (
                       getFolderSvg({ width: '120', height: '100', color: activeDragItem.color })
@@ -624,7 +717,7 @@ const Home: React.FC = () => {
                   </div>
                 </div>
               ) : (
-                <div className="pointer-events-none flex gap-[12px] h-[100px] border border-gray-200 rounded-[8px] p-[10px] bg-white shadow-lg">
+                <div className="pointer-events-none flex gap-[12px] h-[100px] border border-gray-200/60 rounded-[8px] p-[10px] bg-white/70 shadow-xl opacity-70 transform origin-center scale-50">
                   <div className="flex items-center justify-center w-[62px] h-[80px]">
                     {activeDragItem.type === 'folder' ? (
                       getFolderSvg({ width: '42', height: '35', color: activeDragItem.color })
@@ -692,5 +785,15 @@ const DraggableDroppableCard: React.FC<{
     >
       {children}
     </div>
+  );
+};
+
+// 뒤로가기 버튼 droppable
+const BackDroppable: React.FC<{ onClick: () => void }> = ({ onClick }) => {
+  const { setNodeRef, isOver } = useDroppable({ id: 'back-area', data: { kind: 'back' } });
+  return (
+    <button ref={setNodeRef} onClick={onClick} className={`${isOver ? 'ring-2 ring-primary-purple rounded-[6px]' : ''}`}>
+      <IconArrowLeft7 width="32" height="32" className="text-black" />
+    </button>
   );
 };

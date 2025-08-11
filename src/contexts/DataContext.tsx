@@ -143,6 +143,67 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     setMyDocs((prev: any[]) => updateFolderDataRecursive(prev, folder));
   };
 
+
+  // itemId에 해당하는 아이템을 찾아서 목표 폴더로 이동시키는 함수 (동기 함수로 변경)
+  const moveFolder = (items: any[], itemId: string, toFolderId: string): any[] => {
+    let movedItem: any = null;
+
+    // 아이템을 찾아서 제거하는 재귀 함수
+    const removeItem = (arr: any[]): any[] => {
+      return arr.reduce((acc: any[], item: any) => {
+        if (item.id === itemId) {
+          movedItem = item;
+          return acc;
+        }
+        if (item.type === 'folder' && Array.isArray(item.items)) {
+          const newItems = removeItem(item.items);
+          acc.push({ ...item, items: newItems });
+        } else {
+          acc.push(item);
+        }
+        return acc;
+      }, []);
+    };
+
+    // 아이템을 추가하는 재귀 함수
+    const addItem = (arr: any[]): any[] => {
+      return arr.map((item: any) => {
+        if (item.type === 'folder' && item.id === toFolderId) {
+          return {
+            ...item,
+            items: [...(item.items || []), movedItem],
+          };
+        }
+        if (item.type === 'folder' && Array.isArray(item.items)) {
+          return { ...item, items: addItem(item.items) };
+        }
+        return item;
+      });
+    };
+
+    // 1. 아이템을 트리에서 제거
+    let removed = removeItem(items);
+
+    // 2. 최상위로 이동하는 경우
+    if (!toFolderId) {
+      if (movedItem) {
+        removed = [...removed, movedItem];
+      }
+      return removed;
+    }
+
+    // 3. 목표 폴더에 아이템 추가
+    return addItem(removed);
+  };
+
+  // 폴더 이동
+  const setUpdateMyDocsFolderMove = async ({itemId, toFolderId}: {itemId: string, toFolderId: string}) => {
+    // TODO: 백엔드 서버 업데이트 필요
+    // 성공 시 dataContext 내부 데이터 업데이트
+    setMyDocs((prev: any[]) => moveFolder(prev, itemId, toFolderId));
+  };
+
+
   // 단어장 조회
   const getFetchVocabs = async () => {
     // const url = `${SERVER_URL}/user/vocabs`;
@@ -404,6 +465,8 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     setMyDocs,
     myDocsLoaded,
     setUpdateMyDocsFolder,
+    setUpdateMyDocsFolderMove,
+
     
     // 복습 노트
     reviewNotes,

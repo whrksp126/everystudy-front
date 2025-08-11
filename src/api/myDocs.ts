@@ -43,3 +43,20 @@ export const updateFolderfetch = async (folderId: string, name: string, color: s
     return null;
   }
 }
+
+
+// 폴더 이동
+export const moveFolderfetch = async ({ itemId, toFolderId }: { itemId: string, toFolderId: string }) => {
+  const url = `${SERVER_URL}/folder/move_folder`;
+  const method = 'PATCH';
+  const fetchData = {
+    folder_id : itemId,
+    parent_folder_id : toFolderId,
+  }
+  try{
+    return await fetchDataAsync(url, method, fetchData);
+  }catch(error){
+    console.error(error);
+    return null;
+  }
+}
