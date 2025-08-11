@@ -224,8 +224,10 @@ const SetMyBookModal: React.FC<SetMyBookModalProps> = () => {
 
   return (
     <div 
-      style={{maxHeight: 'min(600px, 90vh)',}}
-      className="flex flex-col max-w-[712px] w-full h-full pb-[32px] rounded-[13px] bg-white shadow-xl overflow-hidden"
+      className="
+        max-w-[712px] max-h-[min(600px,90vh)] w-full h-full pb-[32px] rounded-[13px] bg-white shadow-xl overflow-hidden
+        max-sm:max-w-full max-sm:max-h-full max-sm:rounded-none
+      "
       >
       {/* 헤더 */}
       <div className="relative flex items-center justify-between h-[64px] px-[20px]">
@@ -235,13 +237,29 @@ const SetMyBookModal: React.FC<SetMyBookModalProps> = () => {
         >
           <IconArrowLeft width={32} height={32} className="text-gray-400" />
         </button>
-        <h2 className="absolute left-1/2 -translate-x-1/2 text-20b text-gray-800">
+        <h2 className="
+          absolute left-1/2 -translate-x-1/2 text-20b text-gray-800 
+          max-sm:hidden
+          "
+        >
           신규 교재 등록 신청
         </h2>
       </div>
       {/* 메인 */}
-      <div ref={scrollContainerRef} className="flex flex-col gap-[24px] flex-1 overflow-y-auto max-h-[calc(600px-64px)] px-[32px] py-[24px]">
-        <div className="flex flex-col gap-[24px]">
+      <div ref={scrollContainerRef} className="
+        flex flex-col gap-[24px] flex-1 overflow-y-auto max-h-[calc(600px-64px)] px-[32px] py-[24px]
+        max-sm:px-[0px] max-sm:py-[0px] max-sm:max-h-[calc(100vh-64px-84px)] max-sm:h-full
+      ">
+        {/* 모바일 헤더 */}
+        <div className="px-[20px] py-[15px] hidden max-sm:flex">
+          <h2 className="text-20b text-gray-800 hidden max-sm:block">신규 교재 등록 신청</h2>
+
+        </div>
+
+        <div className="
+          flex flex-col gap-[24px]
+          max-sm:px-[16px] max-sm:pt-[20px]
+        ">
           <div className="flex flex-col gap-[24px]">
             <div className="flex gap-[16px] items-center">
               <h3 className="w-[80px] text-16s text-black">교재명</h3>
@@ -486,7 +504,10 @@ const SetMyBookModal: React.FC<SetMyBookModalProps> = () => {
 
           </div>  
         </div>
-        <div className="flex items-center gap-[4px]">
+        <div className="
+          flex items-center gap-[4px]
+          max-sm:px-[16px] max-sm:pt-[20px]
+        ">
           <IconNotification width={16} height={16} className="text-primary-purple" />
           <span className="text-14r text-primary-purple">신규 교재 등록이 완료되면 푸시알림으로 알려드려요. 등록이 완료되기 전에도 파일뷰어 기능은 사용할 수 있어요.</span>
         </div>

@@ -162,6 +162,24 @@ const Home: React.FC = () => {
     }
   }
 
+  // 폴더 이름 찾기
+  const findFolderName = (folderPath: string[]) => {
+    let currentItems = getMyDocs();
+    let folderName = '';
+    for (const folderId of folderPath) {
+      const foundFolder = currentItems.find((item: any) => item.type === 'folder' && item.id === folderId);
+      if (foundFolder) {
+        folderName = foundFolder.name;
+        currentItems = foundFolder.items || [];
+      } else {
+        folderName = '';
+        break;
+      }
+    }
+    return folderName;
+  }
+
+
   // 드롭다운 외부 클릭 시 닫기
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -246,7 +264,7 @@ const Home: React.FC = () => {
               >
                 <div className="flex items-center justify-center w-full h-[180px]">
                   <img
-                    src={book.image}
+                    src={book.cover_img || ''}
                     alt="교재 이미지"
                     className="max-w-full max-h-full w-[100%] h-[100%] object-contain"
                   />
@@ -360,7 +378,9 @@ const Home: React.FC = () => {
                 <IconArrowLeft7 width="32" height="32" className="text-black" />
               </button>
               )}
-              <h2 className="text-20b text-black">내 교재</h2>
+              <h2 className="text-20b text-black">
+                {folderPath.length > 0 ? findFolderName(folderPath) : '내 교재'}
+              </h2>
             </div>
             <div className="flex items-center gap-[12px]">
               {/* 
@@ -443,7 +463,7 @@ const Home: React.FC = () => {
         </div>
         {/* 컨텐츠 */}
         {viewMode === 'category' ? (
-        <div className="flex flex-wrap gap-[20px]">
+        <div className="flex flex-wrap gap-[20px] min-h-[264px]">
           {viewMyDocs && viewMyDocs.length > 0 && viewMyDocs.map((item) => (
             <div 
               onClick={() => handleClickItem(item)}
@@ -455,14 +475,14 @@ const Home: React.FC = () => {
                   getFolderSvg({ width: '120', height: '100', color: item.color })
                 ) : (
                   <img 
-                    src={item.image || ''} 
+                    src={item.cover_img || ''} 
                     alt="교재 이미지"                   
                     className="max-w-full max-h-full w-[100%] h-[100%] object-contain"
                   />
                 )}
               </div>
               <div className="flex items-center justify-between">
-                <h3 className="text-13m text-gray-800 line-clamp-2">{item.name}</h3>
+                <h3 className="text-13m text-gray-800 line-clamp-2">{item.type === 'folder' ? item.name : item.title}</h3>
                 <button onClick={(event) => handleMoreOptionsClick(event, item)}>
                   <IconKebab width="24" height="24" className="text-gray-200" />
                 </button>
@@ -482,11 +502,11 @@ const Home: React.FC = () => {
               {item.type === 'folder'  ? (
                 getFolderSvg({width: '42', height: '35', color: item.color})
               ) : (
-                <img src={item.image || ''} alt="교재 이미지" />
+                <img src={item.cover_img || ''} alt="교재 이미지" />
               )}
             </div>
             <div className="flex items-center justify-between flex-1">
-              <h3 className="text-13m text-gray-800 line-clamp-2">{item.name}</h3>
+              <h3 className="text-13m text-gray-800 line-clamp-2">{item.type === 'folder' ? item.name : item.title}</h3>
               <button onClick={(event) => handleMoreOptionsClick(event, item)}>
                 <IconKebab width="24" height="24" className="text-gray-200" />
               </button>

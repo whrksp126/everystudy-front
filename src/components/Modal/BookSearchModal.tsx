@@ -126,6 +126,7 @@ const BookSearchStoreModal: React.FC = () => {
           max-sm:max-h-full
         "
       >
+        {/* 모바일 헤더 */}
         <div className="flex flex-col gap-[24px] px-[20px] py-[15px] hidden max-sm:flex">
           <h2
             className="text-20b text-gray-800"
