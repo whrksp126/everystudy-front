@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { DndContext, DragOverlay, MouseSensor, TouchSensor, useSensor, useSensors, useDraggable, useDroppable } from '@dnd-kit/core';
+import type { DragStartEvent, DragOverEvent, DragEndEvent } from '@dnd-kit/core';
 import EveryStudyLogo from '../assets/EveryStudyLogo.png';
 import MyBookOverflowMenu from '../components/MyBookOverflowMenu';
 import OverflowMenu from '../components/OverflowMenu/OverflowMenu';
@@ -98,11 +100,11 @@ const Home: React.FC = () => {
   const filterRecentLearningDocs = (myDocs) => {
     return myDocs
       .filter(doc => doc.type !== 'folder') 
-      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+      .sort((a, b) =>  new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
   };
 
   // 내 교재 정렬
-  const sortMyDocs = (sortItems: any[]) => {
+  const sortMyDocs = (sortItems: any) => {
     const option = selectedSort || '최근 등록순';
     if(option === '최근 등록순'){
       return sortItems
@@ -113,7 +115,7 @@ const Home: React.FC = () => {
     } else if(option === '제목순'){
       return sortItems
         .sort((a, b) => {
-          const getName = (item) => item.type === 'folder' ? item.name : item.title;
+          const getName = (item: any) => item.type === 'folder' ? item.name : item.title;
           return getName(a).localeCompare(getName(b));
         })
     }
@@ -156,6 +158,7 @@ const Home: React.FC = () => {
     if(item.type === 'folder'){
       setFolderPath([...folderPath, item.id]);
     }
+    console.log(item);
   }
 
   // 폴더 뒤로가기
@@ -169,6 +172,7 @@ const Home: React.FC = () => {
   const findFolderName = (folderPath: string[]) => {
     let currentItems = getMyDocs();
     let folderName = '';
+    console.log("folderPath", folderPath);
     for (const folderId of folderPath) {
       const foundFolder = currentItems.find((item: any) => item.type === 'folder' && item.id === folderId);
       if (foundFolder) {
@@ -179,6 +183,7 @@ const Home: React.FC = () => {
         break;
       }
     }
+    console.log("folderName,.", folderName);
     return folderName;
   }
 
@@ -196,6 +201,20 @@ const Home: React.FC = () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
+
+  // DragOverlay 렌더용 활성 아이템 상태
+  const [activeDragItem, setActiveDragItem] = useState<any | null>(null);
+  // 폴더 hover 유지 감지 (1초 이상)
+  const [overFolderId, setOverFolderId] = useState<string | null>(null);
+  const hoverTimeoutRef = useRef<number | null>(null);
+  const clearHoverTimer = () => {
+    if (hoverTimeoutRef.current) {
+      window.clearTimeout(hoverTimeoutRef.current);
+      hoverTimeoutRef.current = null;
+    }
+  };
+  // 뒤로가기 hover 타이머
+  const backHoverTimeoutRef = useRef<number | null>(null);
 
   return (
     <div className="flex flex-col">
@@ -362,6 +381,74 @@ const Home: React.FC = () => {
       </div>
 
       {/* Main */}
+      <DndContext
+        sensors={useSensors(
+          useSensor(MouseSensor, { activationConstraint: { delay: 1000, tolerance: 5 } }),
+          useSensor(TouchSensor, { activationConstraint: { delay: 1000, tolerance: 5 } })
+        )}
+        onDragStart={(e: DragStartEvent) => {
+          const data: any = e.active.data.current;
+          console.log('[drag start] id:', e.active.id, 'item:', data?.item);
+          setActiveDragItem(data?.item || null);
+        }}
+        onDragOver={(e: DragOverEvent) => {
+          const overData: any = e.over?.data?.current;
+          if (overData) {
+            console.log('[drag over] overId:', e.over?.id, 'overItem:', overData.item);
+            // 폴더 위 3초 머무름 → 자동 진입
+            const isFolder = overData.item?.type === 'folder';
+            const currentFolderId = isFolder ? overData.item.id : null;
+            if (isFolder) {
+              // 뒤로가기 타이머는 취소
+              if (backHoverTimeoutRef.current) {
+                window.clearTimeout(backHoverTimeoutRef.current);
+                backHoverTimeoutRef.current = null;
+              }
+              if (overFolderId !== currentFolderId) {
+                setOverFolderId(currentFolderId);
+                clearHoverTimer();
+                hoverTimeoutRef.current = window.setTimeout(() => {
+                  console.log('[hover 3s] folderId:', currentFolderId, overData.item, '→ enter folder');
+                  setFolderPath((prev) => [...prev, currentFolderId]);
+                  setOverFolderId(null);
+                  clearHoverTimer();
+                }, 3000);
+              }
+            } else {
+              setOverFolderId(null);
+              clearHoverTimer();
+            }
+          } else if (e.over?.id === 'back-area') {
+            // 뒤로가기 버튼 위 3초 유지 → 상위 폴더로 나가기
+            setOverFolderId(null);
+            clearHoverTimer();
+            if (folderPath.length > 0 && !backHoverTimeoutRef.current) {
+              backHoverTimeoutRef.current = window.setTimeout(() => {
+                console.log('[hover 3s] back-area → go parent');
+                setFolderPath((prev) => prev.slice(0, prev.length - 1));
+                if (backHoverTimeoutRef.current) {
+                  window.clearTimeout(backHoverTimeoutRef.current);
+                  backHoverTimeoutRef.current = null;
+                }
+              }, 3000);
+            }
+          } else {
+            // 아무 곳도 아니거나 다른 요소 → 타이머 초기화
+            if (backHoverTimeoutRef.current) {
+              window.clearTimeout(backHoverTimeoutRef.current);
+              backHoverTimeoutRef.current = null;
+            }
+          }
+        }}
+        onDragEnd={(e: DragEndEvent) => {
+          const activeData: any = e.active.data.current;
+          const overData: any = e.over?.data?.current;
+          console.log('[drag end] activeId:', e.active.id, 'activeItem:', activeData?.item, 'droppedOn:', e.over?.id, 'overItem:', overData?.item);
+          setActiveDragItem(null);
+          setOverFolderId(null);
+          clearHoverTimer();
+        }}
+      >
       <div className="
         flex flex-col gap-[32px] px-[60px] py-[24px] bg-white
         max-sm:px-[16px]
@@ -465,60 +552,95 @@ const Home: React.FC = () => {
           </div>
         </div>
         {/* 컨텐츠 */}
-        {viewMode === 'category' ? (
-        <div className="flex flex-wrap gap-[20px] min-h-[264px]">
-          {viewMyDocs && viewMyDocs.length > 0 && viewMyDocs.map((item) => (
-            <div 
-              onClick={() => handleClickItem(item)}
-              key={item.id} 
-              className="flex flex-col gap-[12px] w-[160px] h-[264px] border border-gray-75 rounded-[8px] p-[10px] bg-gray-25"
-            >
-              <div className="flex items-center justify-center w-full h-[180px]">
-                {item.type === 'folder' ? (
-                  getFolderSvg({ width: '120', height: '100', color: item.color })
-                ) : (
-                  <img 
-                    src={item.cover_img || ''} 
-                    alt="교재 이미지"                   
-                    className="max-w-full max-h-full w-[100%] h-[100%] object-contain"
-                  />
-                )}
-              </div>
-              <div className="flex items-center justify-between">
-                <h3 className="text-13m text-gray-800 line-clamp-2">{item.type === 'folder' ? item.name : item.title}</h3>
-                <button onClick={(event) => handleMoreOptionsClick(event, item)}>
-                  <IconKebab width="24" height="24" className="text-gray-200" />
-                </button>
-              </div>
+          {viewMode === 'category' ? (
+            <div className="flex flex-wrap gap-[20px] min-h-[264px]">
+              {viewMyDocs && viewMyDocs.length > 0 && viewMyDocs.map((item, idx) => (
+                <DraggableDroppableCard
+                  key={item.id}
+                  id={item.id}
+                  item={item}
+                  index={idx}
+                  onItemClick={() => handleClickItem(item)}
+                  className="flex flex-col gap-[12px] w-[160px] h-[264px] border border-gray-75 rounded-[8px] p-[10px] bg-gray-25"
+                >
+                  <div className="flex items-center justify-center w-full h-[180px]">
+                    {item.type === 'folder' ? (
+                      getFolderSvg({ width: '120', height: '100', color: item.color })
+                    ) : (
+                      <img src={item.cover_img || ''} alt="교재 이미지" className="max-w-full max-h-full w-[100%] h-[100%] object-contain" />
+                    )}
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-13m text-gray-800 line-clamp-2">{item.type === 'folder' ? item.name : item.title}</h3>
+                    <button onClick={(event) => handleMoreOptionsClick(event, item)}>
+                      <IconKebab width="24" height="24" className="text-gray-200" />
+                    </button>
+                  </div>
+                </DraggableDroppableCard>
+              ))}
             </div>
-          ))}
-        </div>
-        ) : (
-        <div className="flex flex-col gap-[16px]">
-        {viewMyDocs && viewMyDocs.length > 0 && viewMyDocs.map((item) => (
-          <div
-            onClick={() => handleClickItem(item)}
-            key={item.id} 
-            className="flex gap-[12px] h-[100px] border border-gray-75 rounded-[8px] p-[10px] bg-gray-25"
-          >
-            <div className="flex items-center justify-center w-[62px] h-[80px]">
-              {item.type === 'folder'  ? (
-                getFolderSvg({width: '42', height: '35', color: item.color})
+          ) : (
+            <div className="flex flex-col gap-[16px]">
+              {viewMyDocs && viewMyDocs.length > 0 && viewMyDocs.map((item, idx) => (
+                <DraggableDroppableCard
+                  key={item.id}
+                  id={item.id}
+                  item={item}
+                  index={idx}
+                  onItemClick={() => handleClickItem(item)}
+                  className="flex gap-[12px] h-[100px] border border-gray-75 rounded-[8px] p-[10px] bg-gray-25"
+                >
+                  <div className="flex items-center justify-center w-[62px] h-[80px]">
+                    {item.type === 'folder' ? (
+                      getFolderSvg({ width: '42', height: '35', color: item.color })
+                    ) : (
+                      <img src={item.cover_img || ''} alt="교재 이미지" />
+                    )}
+                  </div>
+                  <div className="flex items-center justify-between flex-1">
+                    <h3 className="text-13m text-gray-800 line-clamp-2">{item.type === 'folder' ? item.name : item.title}</h3>
+                    <button onClick={(event) => handleMoreOptionsClick(event, item)}>
+                      <IconKebab width="24" height="24" className="text-gray-200" />
+                    </button>
+                  </div>
+                </DraggableDroppableCard>
+              ))}
+            </div>
+          )}
+
+          <DragOverlay>
+            {activeDragItem ? (
+              viewMode === 'category' ? (
+                <div className="pointer-events-none flex flex-col gap-[12px] w-[160px] h-[264px] border border-gray-200 rounded-[8px] p-[10px] bg-white shadow-lg">
+                  <div className="flex items-center justify-center w-full h-[180px]">
+                    {activeDragItem.type === 'folder' ? (
+                      getFolderSvg({ width: '120', height: '100', color: activeDragItem.color })
+                    ) : (
+                      <img src={activeDragItem.cover_img || ''} alt="교재 이미지" className="max-w-full max-h-full w-[100%] h-[100%] object-contain" />
+                    )}
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-13m text-gray-800 line-clamp-2">{activeDragItem.type === 'folder' ? activeDragItem.name : activeDragItem.title}</h3>
+                  </div>
+                </div>
               ) : (
-                <img src={item.cover_img || ''} alt="교재 이미지" />
-              )}
-            </div>
-            <div className="flex items-center justify-between flex-1">
-              <h3 className="text-13m text-gray-800 line-clamp-2">{item.type === 'folder' ? item.name : item.title}</h3>
-              <button onClick={(event) => handleMoreOptionsClick(event, item)}>
-                <IconKebab width="24" height="24" className="text-gray-200" />
-              </button>
-            </div>
-          </div>
-        ))}
+                <div className="pointer-events-none flex gap-[12px] h-[100px] border border-gray-200 rounded-[8px] p-[10px] bg-white shadow-lg">
+                  <div className="flex items-center justify-center w-[62px] h-[80px]">
+                    {activeDragItem.type === 'folder' ? (
+                      getFolderSvg({ width: '42', height: '35', color: activeDragItem.color })
+                    ) : (
+                      <img src={activeDragItem.cover_img || ''} alt="교재 이미지" />
+                    )}
+                  </div>
+                  <div className="flex items-center justify-between flex-1">
+                    <h3 className="text-13m text-gray-800 line-clamp-2">{activeDragItem.type === 'folder' ? activeDragItem.name : activeDragItem.title}</h3>
+                  </div>
+                </div>
+              )
+            ) : null}
+          </DragOverlay>
         </div>
-        )}
-        </div>
+      </DndContext>
       
       {/* 오버플로우 메뉴 컴포넌트 */}
       <OverflowMenu />
@@ -527,3 +649,48 @@ const Home: React.FC = () => {
 };
 
 export default Home; 
+ 
+// 단순 DnD 래퍼: 각 카드/행에 draggable+droppable 바인딩하고 dnd-kit로 데이터 전달
+const DraggableDroppableCard: React.FC<{
+  id: string;
+  item: any;
+  index: number;
+  className?: string;
+  children: React.ReactNode;
+  onItemClick?: () => void;
+}> = ({ id, item, index, className, children, onItemClick }) => {
+  const { attributes, listeners, setNodeRef: setDragRef, isDragging } = useDraggable({ id, data: { item, index } });
+  const { setNodeRef: setDropRef, isOver } = useDroppable({ id: `drop-${id}`, data: { item, index } });
+
+  const mergedRef = (node: HTMLElement | null) => {
+    setDragRef(node);
+    setDropRef(node);
+  };
+
+  const pointerDownAtRef = React.useRef<number>(0);
+  const activationDelayMs = 1000; // Home의 센서 delay와 동일하게 유지
+  const handlePointerDown = () => {
+    pointerDownAtRef.current = Date.now();
+  };
+  
+  const handleClick = () => {
+    const elapsed = Date.now() - (pointerDownAtRef.current || 0);
+    // 롱프레스(드래그) 아닌 빠른 클릭만 허용
+    if (elapsed < activationDelayMs) {
+      onItemClick && onItemClick();
+    }
+  };
+
+  return (
+    <div
+      ref={mergedRef}
+      className={`${className || ''} ${isDragging ? 'opacity-50' : ''} ${isOver ? 'ring-2 ring-primary-purple' : ''}`}
+      onPointerDown={handlePointerDown}
+      onClick={handleClick}
+      {...listeners}
+      {...attributes}
+    >
+      {children}
+    </div>
+  );
+};
