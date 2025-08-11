@@ -20,6 +20,7 @@ import {
   IconChevronUp, 
   IconChevronDown, 
   IconKebab,
+  IconArrowLeft7,
 } from '../assets/Icon.tsx';
 
 const sortOptions = [
@@ -52,29 +53,46 @@ const Home: React.FC = () => {
   } = useData();
 
 
+  // 최근 학습 데이터 업데이트
   useEffect(() => {
-    if(myDocsLoaded && reviewNotesLoaded && vocabsLoaded ){
-      myDocsCallback();
-      setVocabs(getVocabs());
+    if(myDocsLoaded){
+      setRecentStudyBooks(filterRecentLearningDocs(myDocs));
+    }
+  }, [myDocsLoaded, myDocs]);
+
+  // 복습 데이터 업데이트
+  useEffect(() => {
+    if(reviewNotesLoaded){
       setReviewNotes(getReviewNotes());
     }
-  }, [myDocsLoaded, reviewNotesLoaded, vocabsLoaded]);
+  }, [reviewNotesLoaded ]);
 
-
-  useEffect(()=>{
-    if(myDocsLoaded && reviewNotesLoaded && vocabsLoaded ){
-      myDocsCallback();
+  // 단어장 데이터 업데이트
+  useEffect(() => {
+    if(vocabsLoaded){
+      setVocabs(getVocabs());
     }
-  },[myDocs])
+  }, [vocabsLoaded]);
 
 
-  const myDocsCallback = ()=>{
-    console.log('myDocsCallback');
-    const myDocs = getMyDocs();
-    const sortedMyDocs = sortMyDocs(myDocs);
-    setViewMyDocs(sortedMyDocs || []);
-    setRecentStudyBooks(filterRecentLearningDocs(myDocs));
-  }
+  // 내 교재 영역 변경
+  useEffect(()=>{
+    if(myDocsLoaded){
+      let currentItems = getMyDocs();
+      for (const folderId of folderPath) {
+        const foundFolder = currentItems.find((item: any) => item.type === 'folder' && item.id === folderId);
+        if (foundFolder && foundFolder.items) {
+          currentItems = foundFolder.items;
+        } else {
+          currentItems = [];
+          break;
+        }
+      }
+      const sortedItems = sortMyDocs(currentItems);
+      setViewMyDocs(sortedItems || []);
+    }
+  },[myDocsLoaded, myDocs, folderPath, selectedSort])
+
   
 
   // 최근 공부한 교재 필터링
@@ -99,6 +117,7 @@ const Home: React.FC = () => {
     }
   };
   
+  // 정렬 옵션 변경
   const handleSortChange = (option: string) => {
     setSelectedSort(option);
     setIsDropdownOpen(false);
@@ -106,11 +125,13 @@ const Home: React.FC = () => {
     setViewMyDocs(sortedMyDocs || []);
   };
 
+  // 아이템 ... 더보기 버튼 클릭
   const handleMoreOptionsClick = (event: React.MouseEvent, item: any) => {
     event.stopPropagation();
     openOverflowMenu(event.currentTarget as HTMLElement, <MyBookOverflowMenu item={item} />);
   };
 
+  // 교재 추가
   const handleBookRegistration = () => {
     openModal(BookSearchModal, {}, { 
       preserveState: true, 
@@ -118,11 +139,27 @@ const Home: React.FC = () => {
     });
   };
 
+  // 폴더 추가
   const handleFolderRegistration = () => {
     openModal(SetFolderModal, { type: 'add', folderPath: folderPath }, { 
       preserveState: true, 
       keepInDOM: true 
     });
+  }
+
+  // 아이템 클릭
+  const handleClickItem = (item: any) => {
+    if(item.type === 'folder'){
+      setFolderPath([...folderPath, item.id]);
+    }
+  }
+
+  // 폴더 뒤로가기
+  // 마지막 경로를 삭제함
+  const handleClickBackFolder = () => {
+    if (folderPath.length > 0) {
+      setFolderPath(prev => prev.slice(0, prev.length - 1));
+    }
   }
 
   // 드롭다운 외부 클릭 시 닫기
@@ -170,9 +207,9 @@ const Home: React.FC = () => {
       </div>
 
       {/* SECTION */}
-      <div className="grid grid-cols-3 gap-[16px] px-[40px] py-[24px] bg-gray-50">
+      <div className="grid grid-cols-6 gap-[16px] px-[40px] py-[24px] bg-gray-50 max-sm:hidden">
         {/* 최근 공부한 교재 */}
-        <div className="flex flex-1 flex-col gap-[12px] h-[324px] px-[24px] py-[20px] rounded-[10px] bg-white">
+        <div className="flex flex-1 flex-col gap-[12px] h-[324px] px-[24px] py-[20px] rounded-[10px] bg-white max-lg:col-span-3">
           {/* 제목 */}
           <div>
             <div className="flex items-center gap-[8px]">
@@ -208,7 +245,7 @@ const Home: React.FC = () => {
           
         </div>
         {/* 복습 */}
-        <div className="flex flex-1 flex-col gap-[12px] h-[324px] px-[24px] py-[20px] rounded-[10px] bg-white">
+        <div className="flex flex-1 flex-col gap-[12px] h-[324px] px-[24px] py-[20px] rounded-[10px] bg-white max-lg:col-span-3">
           {/* 제목 */}
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-[8px]">
@@ -239,13 +276,10 @@ const Home: React.FC = () => {
               </div>
               ))}
             </div>
-            
           )}
-
-
         </div>
         {/* 단어장 */}
-        <div className="flex flex-col gap-[12px] h-[324px] px-[24px] py-[20px] rounded-[10px] bg-white">
+        <div className="flex flex-col gap-[12px] h-[324px] px-[24px] py-[20px] rounded-[10px] bg-white max-lg:col-span-6">
           {/* 제목 */}
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-[8px]">
@@ -285,15 +319,24 @@ const Home: React.FC = () => {
         {/* header */}
         <div className="flex justify-between items-center pb-[20px] border-b border-gray-90">
           <div className="flex items-center gap-[20px]">
-            <h2 className="text-20b text-black">내 교재</h2>
+            <div className="flex items-center gap-[8px]">
+              {folderPath.length > 0 && (
+              <button onClick={handleClickBackFolder}>
+                <IconArrowLeft7 width="32" height="32" className="text-black" />
+              </button>
+              )}
+              <h2 className="text-20b text-black">내 교재</h2>
+            </div>
             <div className="flex items-center gap-[12px]">
+              {/* 
               <button 
                 onClick={handleBookRegistration}
                 className="flex items-center gap-[6px] h-[40px] px-[14px] rounded-[6px] bg-gray-50"
               >
                 <IconPlus width="16" height="16" className="text-gray-300" />
                 <span className="text-14m text-gray-500">새 교재</span>
-              </button>
+              </button> 
+              */}
               <button 
                 onClick={handleFolderRegistration}
                 className="flex items-center gap-[6px] h-[40px] px-[14px] rounded-[6px] bg-gray-50"
@@ -364,7 +407,11 @@ const Home: React.FC = () => {
         {viewMode === 'category' ? (
         <div className="flex flex-wrap gap-[20px]">
           {viewMyDocs && viewMyDocs.length > 0 && viewMyDocs.map((item) => (
-            <div key={item.id} className="flex flex-col gap-[12px] w-[160px] h-[264px] border border-gray-75 rounded-[8px] p-[10px] bg-gray-25">
+            <div 
+              onClick={() => handleClickItem(item)}
+              key={item.id} 
+              className="flex flex-col gap-[12px] w-[160px] h-[264px] border border-gray-75 rounded-[8px] p-[10px] bg-gray-25"
+            >
               <div className="flex items-center justify-center w-full h-[180px]">
                 {item.type === 'folder' ? (
                   getFolderSvg({ width: '120', height: '100', color: item.color })
@@ -388,7 +435,11 @@ const Home: React.FC = () => {
         ) : (
         <div className="flex flex-col gap-[16px]">
         {viewMyDocs && viewMyDocs.length > 0 && viewMyDocs.map((item) => (
-          <div key={item.id} className="flex gap-[12px] h-[100px] border border-gray-75 rounded-[8px] p-[10px] bg-gray-25">
+          <div
+            onClick={() => handleClickItem(item)}
+            key={item.id} 
+            className="flex gap-[12px] h-[100px] border border-gray-75 rounded-[8px] p-[10px] bg-gray-25"
+          >
             <div className="flex items-center justify-center w-[62px] h-[80px]">
               {item.type === 'folder'  ? (
                 getFolderSvg({width: '42', height: '35', color: item.color})

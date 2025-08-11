@@ -6,6 +6,10 @@ export default {
   ],
   theme: {
     extend: {
+      screens: {
+        sm: '856px',   // ≥856px
+        lg: '1194px',  // ≥1194px
+      },
       colors: {
         // Primary Colors
         'black': '#000000',
