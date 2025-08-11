@@ -21,6 +21,7 @@ import {
   IconChevronDown, 
   IconKebab,
   IconArrowLeft7,
+  IconMenu,
 } from '../assets/Icon.tsx';
 
 const sortOptions = [
@@ -92,9 +93,7 @@ const Home: React.FC = () => {
       setViewMyDocs(sortedItems || []);
     }
   },[myDocsLoaded, myDocs, folderPath, selectedSort])
-
   
-
   // 최근 공부한 교재 필터링
   const filterRecentLearningDocs = (myDocs) => {
     return myDocs
@@ -107,10 +106,10 @@ const Home: React.FC = () => {
     const option = selectedSort || '최근 등록순';
     if(option === '최근 등록순'){
       return sortItems
-        .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     } else if(option === '최근 학습순'){
       return sortItems
-        .sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime())
+        .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
     } else if(option === '제목순'){
       return sortItems
         .sort((a, b) => a.title.localeCompare(b.title))
@@ -135,7 +134,8 @@ const Home: React.FC = () => {
   const handleBookRegistration = () => {
     openModal(BookSearchModal, {}, { 
       preserveState: true, 
-      keepInDOM: true 
+      keepInDOM: true,
+      smFull: true,
     });
   };
 
@@ -143,7 +143,8 @@ const Home: React.FC = () => {
   const handleFolderRegistration = () => {
     openModal(SetFolderModal, { type: 'add', folderPath: folderPath }, { 
       preserveState: true, 
-      keepInDOM: true 
+      keepInDOM: true,
+      smFull: false,
     });
   }
 
@@ -155,7 +156,6 @@ const Home: React.FC = () => {
   }
 
   // 폴더 뒤로가기
-  // 마지막 경로를 삭제함
   const handleClickBackFolder = () => {
     if (folderPath.length > 0) {
       setFolderPath(prev => prev.slice(0, prev.length - 1));
@@ -182,11 +182,23 @@ const Home: React.FC = () => {
       <div className="h-[24px] bg-gray-50"></div>
 
       {/* GNB */}
-      <div className="flex justify-between items-center w-full h-[72px] px-[24px] pt-[12px] pb-[20px] bg-gray-50">
+      <div className="
+        flex justify-between items-center w-full h-[72px] px-[24px] pt-[12px] pb-[20px] bg-gray-50
+        max-sm:h-[64px] max-sm:pb-[12px]
+      ">
         <div className="">
           {/* 태블릿 로고 */}
-          <img src={EveryStudyLogo} alt="EveryStudyLogo" className="h-[20px]" />
+          <img src={EveryStudyLogo} alt="EveryStudyLogo" className="
+            h-[20px]
+            max-sm:hidden
+          " />
           {/* 모바일 더보기 버튼*/}
+          <button className="
+            flex items-center gap-[6px] h-[40px] px-[14px] rounded-[6px] bg-gray-50 hidden
+            max-sm:flex
+          ">
+            <IconMenu width="24" height="24" className="text-black" />
+          </button>
 
         </div>
         <div className="flex items-center gap-[12px]">
@@ -209,7 +221,9 @@ const Home: React.FC = () => {
       {/* SECTION */}
       <div className="grid grid-cols-6 gap-[16px] px-[40px] py-[24px] bg-gray-50 max-sm:hidden">
         {/* 최근 공부한 교재 */}
-        <div className="flex flex-1 flex-col gap-[12px] h-[324px] px-[24px] py-[20px] rounded-[10px] bg-white max-lg:col-span-3">
+        <div className="
+          col-span-2 flex flex-1 flex-col gap-[12px] h-[324px] px-[24px] py-[20px] rounded-[10px] bg-white 
+          max-lg:col-span-3">
           {/* 제목 */}
           <div>
             <div className="flex items-center gap-[8px]">
@@ -245,7 +259,10 @@ const Home: React.FC = () => {
           
         </div>
         {/* 복습 */}
-        <div className="flex flex-1 flex-col gap-[12px] h-[324px] px-[24px] py-[20px] rounded-[10px] bg-white max-lg:col-span-3">
+        <div className="
+          col-span-2 flex flex-1 flex-col gap-[12px] h-[324px] px-[24px] py-[20px] rounded-[10px] bg-white 
+          max-lg:col-span-3
+        ">
           {/* 제목 */}
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-[8px]">
@@ -279,7 +296,10 @@ const Home: React.FC = () => {
           )}
         </div>
         {/* 단어장 */}
-        <div className="flex flex-col gap-[12px] h-[324px] px-[24px] py-[20px] rounded-[10px] bg-white max-lg:col-span-6">
+        <div className="
+          col-span-2 flex flex-col gap-[12px] h-[324px] px-[24px] py-[20px] rounded-[10px] bg-white 
+          max-lg:col-span-6 max-lg:h-[152px]
+        ">
           {/* 제목 */}
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-[8px]">
@@ -296,9 +316,15 @@ const Home: React.FC = () => {
               <span className="text-18m text-gray-400 text-center">단어장이 없습니다</span>
             </div>
           ) : (
-            <div className="flex flex-col gap-[8px]">
+            <div className="
+              flex flex-col gap-[8px]
+              max-lg:flex-row
+            ">
               {vocabs.map((item) => (
-                <div key={item.id} className="flex justify-between items-center px-[12px] py-[14px] rounded-[12px] bg-gray-25">
+                <div key={item.id} className="
+                  flex justify-between items-center px-[12px] py-[14px] rounded-[12px] bg-gray-25
+                  max-lg:flex-1
+                ">
                   <div className="flex flex-col gap-[8px]">
                     <span className="text-13m text-gray-800">{item.title}</span>
                     <div className="">
@@ -306,7 +332,7 @@ const Home: React.FC = () => {
                       <span className="text-16b text-gray-200">{item.koreanWord}</span>
                     </div>
                   </div>
-                  <div className="px-[8px] py-[3px] rounded-[6px] bg-gray-50 px-[12px] py-[6px] text-12r text-gray-600">단어 <strong className="text-primary-purple">{item.wordCount}</strong>개</div>
+                  <div className="px-[8px] py-[3px] rounded-[6px] px-[12px] py-[6px] text-12r text-gray-600">단어 <strong className="text-primary-purple">{item.wordCount}</strong>개</div>
                 </div>
               ))}
             </div>  
@@ -315,10 +341,19 @@ const Home: React.FC = () => {
       </div>
 
       {/* Main */}
-      <div className="flex flex-col gap-[32px] px-[60px] py-[24px] bg-white">
+      <div className="
+        flex flex-col gap-[32px] px-[60px] py-[24px] bg-white
+        max-sm:px-[16px]
+      ">
         {/* header */}
-        <div className="flex justify-between items-center pb-[20px] border-b border-gray-90">
-          <div className="flex items-center gap-[20px]">
+        <div className="
+          flex justify-between items-center pb-[20px] border-b border-gray-90
+          max-sm:flex-col max-sm:items-start max-sm:gap-[16px] max-sm:pb-[16px]
+        ">
+          <div className="
+            flex items-center gap-[20px]
+            max-sm:flex-1 max-sm:justify-between max-sm:w-full
+          ">
             <div className="flex items-center gap-[8px]">
               {folderPath.length > 0 && (
               <button onClick={handleClickBackFolder}>
@@ -346,7 +381,10 @@ const Home: React.FC = () => {
               </button>
             </div>
           </div>
-          <div className="flex items-center justify-between gap-[20px]">
+          <div className="
+            flex items-center justify-between gap-[20px]
+            max-sm:flex-1 max-sm:w-full
+          ">
             {/* 드롭다운 버튼 */}
             <div className="relative" ref={dropdownRef}>
               <button 

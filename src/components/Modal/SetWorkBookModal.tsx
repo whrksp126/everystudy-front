@@ -155,7 +155,10 @@ const SetWorkBookModal: React.FC<{item: any}> = ({item}) => {
 
 
   return (
-    <div className="w-full max-w-[712px] max-h-[600px] pb-[32px] rounded-[13px] bg-white shadow-xl overflow-hidden">
+    <div className="
+      w-full max-w-[712px] max-h-[600px] pb-[32px] rounded-[13px] bg-white shadow-xl overflow-hidden
+      max-sm:max-w-full max-sm:max-h-full max-sm:w-full max-sm:h-full max-sm:rounded-none
+    ">
       {/* 헤더 */}
       <div className="relative flex items-center justify-between h-[64px] px-[20px]">
         <button
@@ -169,7 +172,10 @@ const SetWorkBookModal: React.FC<{item: any}> = ({item}) => {
         </h2>
       </div>
       {/* 메인 */}
-      <div className="flex flex-col gap-[20px] flex-1 max-h-[calc(600px-64px-84px)] py-[24px] overflow-y-auto">
+      <div className="
+        flex flex-col gap-[20px] flex-1 max-h-[calc(600px-64px-84px)] py-[24px] overflow-y-auto
+        max-sm:max-h-[calc(100vh-64px-84px)] max-sm:h-full
+      ">
 
         <div className="px-[32px]">
           <div className="flex gap-[24px] px-[20px] py-[16px]  rounded-[10px] bg-gray-25">

@@ -63,7 +63,8 @@ const BookSearchStoreModal: React.FC = () => {
     console.log('신규 교재 등록');
     pushModal(SetMyBookModal, {}, { 
       preserveState: true, 
-      keepInDOM: true 
+      keepInDOM: true,
+      smFull: true
     });
   };
 
@@ -72,7 +73,8 @@ const BookSearchStoreModal: React.FC = () => {
     console.log('교재 등록', item);
     pushModal(SetWorkBookModal, {item}, { 
       preserveState: true, 
-      keepInDOM: true 
+      keepInDOM: true,
+      smFull: true
     });
   };
 
@@ -83,33 +85,80 @@ const BookSearchStoreModal: React.FC = () => {
 
   return (
     <div 
-      style={{maxHeight: 'min(600px, 90vh)',}}
-      className="max-w-[712px] w-full h-full rounded-[13px] bg-white shadow-xl overflow-hidden"
+      className="
+        max-w-[712px] max-h-[min(600px,90vh)] w-full h-full rounded-[13px] bg-white shadow-xl overflow-hidden
+        max-sm:max-w-full max-sm:max-h-full max-sm:rounded-none
+      "
+
       >
       {/* 헤더 */}
-      <div className="relative flex items-center justify-between h-[64px] px-[20px]">
+      <div className="
+        relative flex items-center justify-between h-[64px] px-[20px]
+      ">
         <button
           onClick={handleClose}
           className="p-[4px]"
         >
           <IconArrowLeft width={32} height={32} className="text-gray-400" />
         </button>
-        <h2 className="absolute left-1/2 -translate-x-1/2 text-20b text-gray-800">
+        <h2
+          className="
+            absolute left-1/2 -translate-x-1/2 text-20b text-gray-800
+            max-sm:hidden
+          "
+        >
           <strong className="text-purple-400">{allEbooks.length}권</strong>의 교재가 준비되어있어요
         </h2>
         <button 
         onClick={handleNewBookRegistration}
-        className="h-[40px] px-[14px] rounded-[6px] bg-primary-purple text-14m text-white"
+        className="
+          h-[40px] px-[14px] rounded-[6px] bg-primary-purple text-14m text-white
+          max-sm:hidden
+        "
         >
           신규 교재 등록
         </button>
       </div>
       {/* 메인 */}
       <div 
-        className="flex-1 overflow-y-auto max-h-[calc(600px-64px)]"
-        >
+        className="
+          flex-1 overflow-y-auto max-h-[calc(600px-64px)]
+          max-sm:max-h-full
+        "
+      >
+        <div className="flex flex-col gap-[24px] px-[20px] py-[15px] hidden max-sm:flex">
+          <h2
+            className="text-20b text-gray-800"
+          >
+            <strong className="text-purple-400">{allEbooks.length}권</strong>의 교재가 준비되어있어요
+          </h2>
+          <div className="flex flex-col gap-[12px]">
+            <button 
+              onClick={handleNewBookRegistration}
+              className="
+                w-[max-content] h-[40px] px-[14px] rounded-[6px] bg-primary-purple text-14m text-white
+              "
+              >
+                신규 교재 등록
+            </button>
+            <div className="relative flex-1">
+              <input 
+                value={searchValue}
+                onChange={(e) => handleSearchInput(e.target.value)}
+                type="text" 
+                placeholder="교재를 검색하세요" 
+                className="w-full h-[48px] py-[13px] pl-[44px] pr-[16px] rounded-[10px] bg-gray-50 text-16m text-gray-800" 
+              />
+              <IconSearch width={20} height={20} className="absolute left-[16px] top-1/2 -translate-y-1/2 text-gray-400" />
+            </div>
+          </div>
+        </div>
+
         {/* 검색 영역 */}
-        <div className="flex items-center justify-between px-[20px] py-[15px]">
+        <div className="
+          flex items-center justify-between px-[20px] py-[15px]
+          max-sm:hidden
+        ">
           <div className="relative flex-1">
             <input 
               value={searchValue}

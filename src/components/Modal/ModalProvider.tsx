@@ -19,9 +19,11 @@ export const ModalProvider: React.FC = () => {
         return (
           <div
             key={modal.id}
-            className={`absolute inset-0 flex items-center justify-center ${
-              index === activeIndex ? 'block' : 'hidden'
-            }`}
+            className={`
+              absolute inset-0 flex items-center justify-center 
+              ${index === activeIndex ? 'block' : 'hidden'}
+              ${modal.options.smFull ? '': 'px-[17px]'}
+            `}
           >
             <ModalComponent {...modal.props} />
           </div>

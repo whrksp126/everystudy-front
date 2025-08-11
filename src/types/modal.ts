@@ -2,6 +2,7 @@ export interface ModalOptions {
   preserveState?: boolean;    // 컴포넌트 상태 보존 (기본값: true)
   preserveScroll?: boolean;   // 스크롤 위치 보존 (기본값: true)
   keepInDOM?: boolean;       // DOM에 유지할지 여부 (기본값: true)
+  smFull?: boolean;          // 모바일 화면 전체 화면 여부 (기본값: false)
 }
 
 export interface ModalStack {

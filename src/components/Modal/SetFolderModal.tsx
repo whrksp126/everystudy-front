@@ -119,7 +119,7 @@ const SetFolderModal: React.FC<SetFolderModalProps> = ({ type, folderPath, item}
         </div>
         <div className="flex flex-col gap-[8px]">
           <h3 className="text-16s text-black">폴더 색상</h3>
-          <div className="flex items-center gap-[10px] p-[5px]">
+          <div className="flex items-center justify-between gap-[10px] p-[5px] overflow-x-auto">
             {folderColors.map((color) => (
               <button
                 key={`color-${color}`}
