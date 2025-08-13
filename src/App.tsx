@@ -1,4 +1,4 @@
-import React from 'react';
+// React import 제거 (새 JSX transform)
 import { BrowserRouter as Router } from 'react-router-dom';
 import AppRoutes from './routes/AppRoutes';
 import { DataProvider } from './contexts/DataContext';

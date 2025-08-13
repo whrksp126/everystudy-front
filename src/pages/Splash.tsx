@@ -43,9 +43,8 @@ const Splash: React.FC = () => {
       navigate('/login');
     }
     if(isLoginUser){
-      navigate('/customExam');
+      navigate('/home');
     }
-
   }
 
 

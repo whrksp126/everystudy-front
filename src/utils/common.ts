@@ -97,7 +97,7 @@ export const getAppPdfFileData = async ({filePath, fileName}: {filePath: string,
   const page_count = fileInfo.total_page;
   const size = fileInfo.size;
   const thumbnailPath = filePath.replace(/\.pdf$/, '.png');
-  const { thumbnailBlob, coverImg } = await getAppThumbnailBlobAndUrl(thumbnailPath);
+  const { thumbnailBlob, coverImg } = await getAppThumbnailBlobAndUrl(thumbnailPath) as any;
   return {
     is_err : false,
     file: null,
@@ -121,14 +121,16 @@ export async function getAppThumbnailBlobAndUrl(thumbnailPath: string) {
       const canvas = document.createElement('canvas');
       canvas.width = img.width;
       canvas.height = img.height;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0);
+  const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.drawImage(img, 0, 0);
+      }
       canvas.toBlob(function(thumbnailBlob) {
-        const coverImg = URL.createObjectURL(thumbnailBlob);
+        const coverImg = URL.createObjectURL(thumbnailBlob as Blob);
         resolve({ thumbnailBlob, coverImg });
       }, 'image/png');
     };
-    img.onerror = function(e) {
+    img.onerror = function() {
       reject(new Error('이미지 로딩 실패'));
     };
   });

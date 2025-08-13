@@ -49,7 +49,7 @@ export const editWorkBookStandardDatafetch = async (title: string, bookId: strin
   const { pdfs: pdfList, audios: audioList } = files;
   
   const form_data: {key: string, value: Blob}[] = [];
-  pdfList.forEach((d, i) => {
+  pdfList.forEach((d: any, i: number) => {
     form_data.push({
       key: `thumbnail_${i+1}`,
       value: d.thumbnail_blob, // 원본 파일

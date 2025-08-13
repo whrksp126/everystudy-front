@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useModal } from '../../hooks/useModal';
 import { IconX } from '../../assets/Icon.tsx';
 import { addFolderfetch, updateFolderfetch } from '../../api/myDocs';
@@ -22,8 +22,8 @@ const folderColors = [
 ];
 
 const SetFolderModal: React.FC<SetFolderModalProps> = ({ type, folderPath, item}) => {
-  const { popModal, closeModal } = useModal();
-  const { setUpdateMyDocsFolder } = useData();
+  const { popModal } = useModal();
+  const { setUpdateMyDocsFolder } = useData() as any;
   const [selectedColor, setSelectedColor] = useState(
     type === 'edit'
       ? (folderColors.includes(item.color) ? item.color : folderColors[0])

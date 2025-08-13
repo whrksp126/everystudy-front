@@ -32,8 +32,8 @@ interface SetMyBookModalProps {
 }
 
 const SetMyBookModal: React.FC<SetMyBookModalProps> = () => {
-  const { popModal, closeModal } = useModal();
-  const [bookId, setBookId] = useState<string>('new');
+  const { popModal } = useModal();
+  const [bookId] = useState<string>('new');
   const [files, setFiles] = useState<any>({pdfs: [],audios: []});
   const [fileStates, setFileStates] = useState<{[key: string]: 'idle' | 'loading' | 'validation_error' | 'upload_error' | 'success'}>({});
   const [titleState, setTitleState] = useState<'idle' | 'error'>('idle');
@@ -117,7 +117,7 @@ const SetMyBookModal: React.FC<SetMyBookModalProps> = () => {
   }, [fileSelector.selectedFile, currentFileIndex]);
 
   // 파일 업로드
-  const handleFileUpload = async (type: string, index: number, bookId: string) => {
+  const handleFileUpload = async (type: string, index: number, bookId?: string) => {
     const fileKey = `${type}_${index}`;
     
     // 로딩 시작
@@ -129,7 +129,7 @@ const SetMyBookModal: React.FC<SetMyBookModalProps> = () => {
 
       if(type === 'pdf' || type === 'audio'){
         setCurrentFileIndex({ type, index });
-        await fileSelector.openFileSelector(type, index, bookId);
+        await fileSelector.openFileSelector(type, index, bookId || 'new');
         return;
       }
 
@@ -152,7 +152,7 @@ const SetMyBookModal: React.FC<SetMyBookModalProps> = () => {
     setTitleState('idle');
     
     let hasError = false;
-    const title = titleInputRef.current?.value.trim();
+    const title = titleInputRef.current?.value.trim() || '';
     if (title === "") {
       setTitleState('error');
       hasError = true;
@@ -174,7 +174,7 @@ const SetMyBookModal: React.FC<SetMyBookModalProps> = () => {
     
     if(hasError) return;
     try{
-      const result = await saveMyBookStandardDatafetch(title, bookId, files);
+      await saveMyBookStandardDatafetch(title, bookId || 'new', files);
     }catch(error){
       console.error(error);
     }
@@ -215,9 +215,9 @@ const SetMyBookModal: React.FC<SetMyBookModalProps> = () => {
 
   // 파일 삭제
   const handleFileDelete = (type: string, index: number) => {
-    setFiles(prev => ({
+    setFiles((prev: any) => ({
       ...prev,
-      [type + 's']: prev[type + 's'].filter((_, i) => i !== index)
+      [type + 's']: prev[type + 's'].filter((_: any, i: number) => i !== index)
     }));
   };
 

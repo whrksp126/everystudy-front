@@ -1,15 +1,9 @@
 import React from 'react';
 import { IconDangerCircle } from '../../assets/Icon';
 import { useAlert } from '../../hooks/useAlert';
-import { useModal } from '../../hooks/useModal';
 
 const WarringNoWorkBookAlert: React.FC = () => {
-  const { popAlert, closeAlert } = useAlert();
-  const { popModal, closeModal } = useModal();
-
-  const handleClose = () => {
-    popAlert();
-  };
+  const { closeAlert } = useAlert();
 
   const handleSave = () => {
     closeAlert();

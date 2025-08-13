@@ -1,5 +1,4 @@
 import { SERVER_URL } from "../utils/server";
-import { DEVICE_DATA } from "../utils/osFunction";
 import { fetchDataAsync } from "../utils/common";
 
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useModal } from '../../hooks/useModal';
 import { IconArrowLeft, IconUpload, IconX } from '../../assets/Icon.tsx';
 import { useAlert } from '../../hooks/useAlert';
@@ -10,12 +10,12 @@ import { setWorkBookPathfetch } from '../../api/workbook';
 const SetWorkBookModal: React.FC<{item: any}> = ({item}) => {
   const { popModal, closeModal } = useModal();
   const { openAlert } = useAlert();
-  const [workBook, setWorkBook] = useState<any>(item);
+  const [workBook] = useState<any>(item);
   const [files, setFiles] = useState<any>(item.files);
   const [fileStates, setFileStates] = useState<{[key: string]: 'idle' | 'loading' | 'validation_error' | 'upload_error' | 'success'}>({});
   
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const [lastAddedIndex, setLastAddedIndex] = useState<{type: string, index: number} | null>(null);
+  // const scrollContainerRef = useRef<HTMLDivElement>(null);
+  // const [lastAddedIndex, setLastAddedIndex] = useState<{type: string, index: number} | null>(null);
 
   // 통합 파일 선택 훅 사용
   const fileSelector = useFileSelector();
@@ -40,7 +40,7 @@ const SetWorkBookModal: React.FC<{item: any}> = ({item}) => {
         
         // 선택된 인덱스에 파일 저장
         if (currentFileIndex.type === 'pdf') {
-          const pdfData = fileData as PdfData;
+          const pdfData = fileData as any;
           arr[currentFileIndex.index] = {
             ...arr[currentFileIndex.index],
             name: pdfData.name,
@@ -52,7 +52,7 @@ const SetWorkBookModal: React.FC<{item: any}> = ({item}) => {
             size: pdfData.size
           };
         } else if (currentFileIndex.type === 'audio') {
-          const audioData = fileData as AudioData;
+          const audioData = fileData as any;
           arr[currentFileIndex.index] = {
             ...arr[currentFileIndex.index],
             name: audioData.name,
@@ -67,7 +67,7 @@ const SetWorkBookModal: React.FC<{item: any}> = ({item}) => {
       });
       
       setFileStates(prev => ({ ...prev, [`${currentFileIndex.type}_${currentFileIndex.index}`]: 'success' }));
-      setLastAddedIndex({ type: currentFileIndex.type, index: currentFileIndex.index });
+      // setLastAddedIndex({ type: currentFileIndex.type, index: currentFileIndex.index });
       setCurrentFileIndex(null);
       fileSelector.setSelectedFile(null);
     }
@@ -137,7 +137,7 @@ const SetWorkBookModal: React.FC<{item: any}> = ({item}) => {
 
   // 파일 삭제
   const handleFileDelete = (type: string, index: number) => {
-    setFiles(prev => ({
+    setFiles((prev: any) => ({
       ...prev,
       [type + 's']: prev[type + 's'].map((item: any, i: number) => {
         if (i === index) {
@@ -147,7 +147,7 @@ const SetWorkBookModal: React.FC<{item: any}> = ({item}) => {
         return item;
       })
     }));
-    setFileStates(prev => ({
+    setFileStates((prev: any) => ({
       ...prev,
       [`${type}_${index}`]: 'idle'
     }));

@@ -12,15 +12,15 @@ export const DEVICE_DATA = {
   VERSION: getDeviceCookie("APP_VERSION"),
 }
 
-let OS_BROWSER = null;
+let OS_BROWSER: any = null;
 if (DEVICE_DATA.OS === 'APP') {
-  OS_BROWSER = chrome?.webview?.hostObjects?.sync?.app_api;
+  OS_BROWSER = (window as any)?.chrome?.webview?.hostObjects?.sync?.app_api;
 }else if(DEVICE_DATA.OS === 'IOS'){
-  OS_BROWSER = window?.webkit?.messageHandlers?.app_api;
+  OS_BROWSER = (window as any)?.webkit?.messageHandlers?.app_api;
 }else if(DEVICE_DATA.OS === 'ANDROID'){
-  OS_BROWSER = typeof app_api !== 'undefined' ? app_api : chrome?.webview?.hostObjects?.sync?.app_api;
+  OS_BROWSER = typeof (window as any).app_api !== 'undefined' ? (window as any).app_api : (window as any)?.chrome?.webview?.hostObjects?.sync?.app_api;
 }else{
-
+  OS_BROWSER = null;
 }
 
 
@@ -28,10 +28,10 @@ if (DEVICE_DATA.OS === 'APP') {
 export function getIosAppApi(action: string, data: any = {}): Promise<any> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return new Promise((resolve, reject) => {
-    if (window.webkit?.messageHandlers?.app_api) {
+    if ((window as any).webkit?.messageHandlers?.app_api) {
       // iOS에 action 값 전송
-      window.__resolveData = resolve; // iOS에서 resolveData를 호출하면 Promise 해결
-      window.webkit.messageHandlers.app_api.postMessage({ action: action, data: data});
+      (window as any).__resolveData = resolve; // iOS에서 resolveData를 호출하면 Promise 해결
+      (window as any).webkit.messageHandlers.app_api.postMessage({ action: action, data: data});
     } else {
       reject("iOS 환경이 아닙니다.");
     }
@@ -52,23 +52,23 @@ const BROWSER_WEB_API = {
 
   save_file_temp : (workbook_id: string, file_type: string) => {return `/${workbook_id}.${file_type}`},
   save_file_static : (workbook_id: string, file_name: string) => {return `/${workbook_id}.${file_name}`},
-  is_file_exists : async (path: string) => {return true},
+  is_file_exists : async (_path: string) => {return true},
   get_file_list : () => {return []},
-  delete_file : (path: string) => {return true},
+  delete_file : (_path: string) => {return true},
   delete_temp_all : ()=>{return true},
-  delete_file_temp : (path: string) => {return true},
-  rename_folder : (oldpath: string, newPaht: string) => {return true},
-  get_file_info : (path: string) => {return {}},
+  delete_file_temp : (_path: string) => {return true},
+  rename_folder : (_oldpath: string, _newPaht: string) => {return true},
+  get_file_info : (_path: string) => {return {}},
   // ** new 공통 함수 수정 금지 ** //
   // *************************** //
 }
 
 
-export const WEBVIEW_API_MAP = {
-  WINDOW : window.pywebview ? pywebview.api : null,
+export const WEBVIEW_API_MAP: Record<string, any> = {
+  WINDOW : (window as any).pywebview ? (window as any).pywebview.api : null,
   IOS: (() => {
     const api = {
-      call: (action, data={}) => {
+      call: (action: string, data: any = {}) => {
         return getIosAppApi(action, data);
       },
     };
@@ -76,8 +76,8 @@ export const WEBVIEW_API_MAP = {
     return Object.assign(
       api,
       ...Object.keys(BROWSER_WEB_API).map(action => ({
-        [action]: function (data) {
-          return this.call(action, data);
+        [action]: function (data?: any) {
+          return (this as any).call(action, data);
         },
       }))
     );
@@ -107,8 +107,8 @@ export async function osSaveFileTemp(workbookId: string, fileType: string, fileI
     }else{
       return new Promise((resolve, reject) => {
         const cbName = 'onSaveFileTempResult';
-        window[cbName] = function(filePath: string, fileName: string) {
-          window[cbName] = undefined;
+        (window as any)[cbName] = function(filePath: string, fileName: string) {
+          (window as any)[cbName] = undefined;
           if (filePath) resolve({filePath: filePath, fileName: fileName});
           else reject('user cancelled or error');
         };

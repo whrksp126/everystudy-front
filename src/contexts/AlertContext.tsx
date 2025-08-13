@@ -7,8 +7,8 @@ type AlertAction =
   | { type: 'OPEN_ALERT'; payload: { component: React.ComponentType<Record<string, unknown>>; props?: Record<string, unknown>; options?: AlertOptions } }
   | { type: 'CLOSE_ALERT' }
   | { type: 'PUSH_ALERT'; payload: { component: React.ComponentType<Record<string, unknown>>; props?: Record<string, unknown>; options?: AlertOptions } }
-  | { type: 'POP_MODAL' }
-  | { type: 'GO_TO_MODAL'; payload: { index: number } }
+  | { type: 'POP_ALERT' }
+  | { type: 'GO_TO_ALERT'; payload: { index: number } }
   | { type: 'CLEAR_STACK' };
 
 interface AlertState {

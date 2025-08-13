@@ -1,9 +1,6 @@
 import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
 import type { ReactNode } from 'react';
-import type { 
-  DataContextType, 
-  DataItem
-} from '../types/data';
+import type { DataContextType } from '../types/data';
 import { SERVER_URL } from '../utils/server.js';
 import { fetchDataAsync } from '../utils/common.js';
 
@@ -15,8 +12,9 @@ interface DataProviderProps {
 
 export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
 
-  const [userInfo, setUserInfo] = useState<any>(null);
-  const [userInfoLoaded, setUserInfoLoaded] = useState<boolean>(false);
+  // 유저 정보 (현재 미사용)
+  // const [userInfo, setUserInfo] = useState<any>(null);
+  // const [userInfoLoaded, setUserInfoLoaded] = useState<boolean>(false);
   const [myDocs, setMyDocs] = useState<any>(null);
   const [myDocsLoaded, setMyDocsLoaded] = useState<boolean>(false);
   const [vocabs, setVocabs] = useState<any>(null);
@@ -25,8 +23,8 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
   const [ebooksLoaded, setEbooksLoaded] = useState<boolean>(false);
   const [reviewNotes, setReviewNotes] = useState<any>(null);
   const [reviewNotesLoaded, setReviewNotesLoaded] = useState<boolean>(false);
-  const [diyExams, setDiyExams] = useState<any>(null);
-  const [diyExamsLoaded, setDiyExamsLoaded] = useState<boolean>(false);
+  const [diyExams] = useState<any>(null);
+  const [diyExamsLoaded] = useState<boolean>(false);
 
   useEffect(() => {
     initFetchData();
@@ -408,9 +406,9 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
 
 
 
-  const getUserInfo = () => {
-    return userInfo;
-  };
+  // const getUserInfo = () => {
+  //   return userInfo;
+  // };
 
   const getMyDocs = useCallback(() => {
     return myDocs;
@@ -452,43 +450,27 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
   // ]);
 
 
-  const value: DataContextType = {
-
-    // 유저 정보
-    userInfo,
-    getUserInfo,
-    userInfoLoaded,
-
-    // 내 문서
+  const value: any = {
     myDocs,
     getMyDocs,
     setMyDocs,
     myDocsLoaded,
     setUpdateMyDocsFolder,
     setUpdateMyDocsFolderMove,
-
-    
-    // 복습 노트
     reviewNotes,
     getReviewNotes,
     reviewNotesLoaded,
-    
-    
-    // 시험지
     diyExams,
     getDiyExams,
     diyExamsLoaded,
-    // 단어장
     vocabs,
     getVocabs,
     vocabsLoaded,
-    // 교재
     ebooks,
     getEbooks,
     getAllEbooks,
     ebooksLoaded,
-
-  };
+  } as unknown as DataContextType;
 
   return (
     <DataContext.Provider value={value}>

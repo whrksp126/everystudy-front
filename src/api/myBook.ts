@@ -11,7 +11,7 @@ export const saveMyBookStandardDatafetch = async (title: string, bookId: string,
   const { pdfs: pdfList, audios: audioList } = files;
   
   const form_data: {key: string, value: Blob}[] = [];
-  pdfList.forEach((d, i) => {
+  pdfList.forEach((d: any, i: number) => {
     form_data.push({
       key: `thumbnail_${i+1}`,
       value: d.thumbnail_blob, // 원본 파일
@@ -62,7 +62,7 @@ export const editMyBookStandardDatafetch = async (title: string, bookId: string,
   const { pdfs: pdfList, audios: audioList } = files;
   
   const form_data: {key: string, value: Blob}[] = [];
-  pdfList.forEach((d, i) => {
+  pdfList.forEach((d: any, i: number) => {
     form_data.push({
       key: `thumbnail_${i+1}`,
       value: d.thumbnail_blob, // 원본 파일
@@ -72,7 +72,7 @@ export const editMyBookStandardDatafetch = async (title: string, bookId: string,
     json_data: {
       workbook_name : title, // 문제집 명
       workbook_id : bookId, // 문제집 id
-      device_id : DEVICE_DATA.ID, // 사용자 기기 타입
+      device_id : getDeviceId(), // 사용자 기기 타입
 
       file_path: {
         pdf: pdfList.map(({ file_id, name, path, page_count, size }: {file_id: string, name: string, path: string, page_count: number, size: {mw: number, mh: number}}, index: number) => ({

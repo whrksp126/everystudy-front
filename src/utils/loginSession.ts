@@ -64,19 +64,19 @@ export async function refreshAccessToken(): Promise<any> {
 export const setDoucmentCookie = async () => {
   let OS_BROWSER;
   let OS_NAME;
-  if(window?.webkit?.messageHandlers?.app_api){
-    OS_BROWSER = window?.webkit?.messageHandlers?.app_api;
+  if((window as any)?.webkit?.messageHandlers?.app_api){
+    OS_BROWSER = (window as any)?.webkit?.messageHandlers?.app_api;
     OS_NAME = "IOS"
-  }else if(typeof app_api !== 'undefined' || window?.chrome?.webview?.hostObjects?.sync?.app_api){
-    OS_BROWSER = typeof app_api !== 'undefined' ? app_api : chrome?.webview?.hostObjects?.sync?.app_api;
+  }else if(typeof (window as any).app_api !== 'undefined' || (window as any)?.chrome?.webview?.hostObjects?.sync?.app_api){
+    OS_BROWSER = typeof (window as any).app_api !== 'undefined' ? (window as any).app_api : (window as any)?.chrome?.webview?.hostObjects?.sync?.app_api;
     OS_NAME = "ANDROID";
-  }else if(window?.pywebview){
+  }else if((window as any)?.pywebview){
     OS_NAME = "WINDOW";
   }else{
     OS_NAME = "BROWSER";
   }
-  const WEBVIEW_API_MAP = {
-    WINDOW: window.pywebview ? pywebview.api : null,
+  const WEBVIEW_API_MAP: any = {
+    WINDOW: (window as any).pywebview ? (window as any).pywebview.api : null,
     IOS:{
       get_deviceid: async () => {return await getIosAppApi("get_deviceid")},
       get_devicetype: async () => {return await getIosAppApi("get_devicetype")},

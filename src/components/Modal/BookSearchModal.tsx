@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useModal } from '../../hooks/useModal';
 import { IconArrowLeft, IconSearch, IconPaperFail, IconArrowRight4 } from '../../assets/Icon';
 import SetMyBookModal from './SetMyBookModal';
@@ -6,9 +6,7 @@ import SetWorkBookModal from './SetWorkBookModal';
 import { useData } from '../../contexts/DataContext';
 
 const BookSearchStoreModal: React.FC = () => {
-  const { 
-    ebooksLoaded, getEbooks, getAllEbooks,
-  } = useData();
+  const { ebooksLoaded, getEbooks, getAllEbooks } = useData() as any;
   const [ebooks, setEbooks] = useState([]);
   const [allEbooks, setAllEbooks] = useState([]);
   const [eBookLibrary, setEBookLibrary] = useState([]);
@@ -71,7 +69,7 @@ const BookSearchStoreModal: React.FC = () => {
   // 교재 선택
   const handleSetWorkBook = (item: any) => {
     console.log('교재 등록', item);
-    pushModal(SetWorkBookModal, {item}, { 
+    pushModal(SetWorkBookModal as unknown as React.ComponentType<Record<string, unknown>>, {item} as unknown as Record<string, unknown>, { 
       preserveState: true, 
       keepInDOM: true,
       smFull: true

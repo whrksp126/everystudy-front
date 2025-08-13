@@ -26,7 +26,7 @@ import {
   IconArrowLeft7,
   IconMenu,
 } from '../assets/Icon.tsx';
-import { moveFolderfetch } from '../api/myDocs.ts';
+import { moveFolderfetch } from '../api/myDocs';
 
 // ---------------- Helper Types/Functions ----------------
 type TreeItem = any;
@@ -118,7 +118,7 @@ const Home: React.FC = () => {
     vocabsLoaded, getVocabs,
     reviewNotesLoaded, getReviewNotes,
     
-  } = useData();
+  } = useData() as any;
 
 
   // 최근 학습 데이터 업데이트
@@ -162,24 +162,24 @@ const Home: React.FC = () => {
   },[myDocsLoaded, myDocs, folderPath, selectedSort])
   
   // 최근 공부한 교재 필터링
-  const filterRecentLearningDocs = (myDocs) => {
+  const filterRecentLearningDocs = (myDocs: any[]) => {
     return myDocs
-      .filter(doc => doc.type !== 'folder') 
-      .sort((a, b) =>  new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      .filter((doc: any) => doc.type !== 'folder') 
+      .sort((a: any, b: any) =>  new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
   };
 
   // 내 교재 정렬
-  const sortMyDocs = (sortItems: any) => {
+  const sortMyDocs = (sortItems: any[]) => {
     const option = selectedSort || '최근 등록순';
     if(option === '최근 등록순'){
       return sortItems
-        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+        .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     } else if(option === '최근 학습순'){
       return sortItems
-        .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+        .sort((a: any, b: any) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
     } else if(option === '제목순'){
       return sortItems
-        .sort((a, b) => {
+        .sort((a: any, b: any) => {
           const getName = (item: any) => item.type === 'folder' ? item.name : item.title;
           return getName(a).localeCompare(getName(b));
         })
@@ -223,7 +223,13 @@ const Home: React.FC = () => {
     if(item.type === 'folder'){
       setFolderPath([...folderPath, item.id]);
     }
-    console.log(item);
+    
+    if(item.type === 'workbook'){
+      window.location.href = `/learning?testType=WORK_BOOK&workbook_id=${item.id}`;
+    }
+    if(item.type === 'mybook'){
+      window.location.href = `/learning?testType=MY_WORKBOOK&workbook_id=${item.id}`;
+    }
   }
 
   // 폴더 뒤로가기
@@ -362,7 +368,7 @@ const Home: React.FC = () => {
     }
 
     try{
-      await moveFolderfetch({ itemId: intent.itemId, toFolderId: intent.toFolderId});
+      await moveFolderfetch({ itemId: intent.itemId, toFolderId: intent.toFolderId || ''});
       setUpdateMyDocsFolderMove({...intent})
     }catch(error){
       console.error(error);
