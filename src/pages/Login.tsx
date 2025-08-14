@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { loginFetch } from '../api/login';
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { googleLoginCallBackFetch, googleLoginFetch, loginFetch } from '../api/login';
 import { setDeviceIdFetch } from '../api/device';
 import { DEVICE_DATA } from '../utils/osFunction';
 import { setDeviceData } from '../utils/localStorage';
@@ -10,6 +10,30 @@ const Login: React.FC = () => {
   const [password, setPassword] = useState('test!@34');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const [params] = useSearchParams();
+
+
+  useEffect(()=>{
+    // 구글 OAuth 콜백인 경우: 바로 토큰 교환 처리
+    const code = params.get('code');
+    if (code) {
+      googleLoginCallBack(code);
+    }
+  }, [])
+
+  // 구글 로그인 콜백 처리
+  const googleLoginCallBack = async (code: string) => {
+    try{
+      const result = await googleLoginCallBackFetch(code);
+      if(result === null) alert("로그인 오류 다시 시도해주세요.");
+      if(result.code !== 200){
+        return alert(result.msg)
+      }
+      await saveUserData(result.data.email);
+    }catch(error){
+      return alert(error);
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,10 +45,16 @@ const Login: React.FC = () => {
       if(result.code !== 200){
         return alert(result.msg)
       }
-      setDeviceData('email', email);
+      await saveUserData(email);
     }catch(error){
       return alert(error);
     }
+
+  };
+
+  // 로그인 성공 후 처리
+  const saveUserData = async (email: string) => {
+    setDeviceData('email', email);
     const type = DEVICE_DATA.TYPE
     const code = DEVICE_DATA.ID
     const name = DEVICE_DATA.NAME
@@ -35,32 +65,9 @@ const Login: React.FC = () => {
       return alert(error);
     }
 
-    navigate('/home');
-    // // 실제 로그인 로직은 여기에 구현
-    // setTimeout(() => {
-    //   setIsLoading(false);
-    //   navigate('/');
-    // }, 1000);
-  };
+    navigate('/home')
+  }
 
-  const handleGoogleLogin = () => {
-    const loginUrl =
-      // "https://rbgvzzal9l.execute-api.ap-northeast-2.amazonaws.com/auth/google/login";
-      "http://localhost:8000/auth/google/login";
-  
-    // iOS WebView 체크
-    if (
-      (window as any).webkit &&
-      (window as any).webkit.messageHandlers &&
-      (window as any).webkit.messageHandlers.app_api
-    ) {
-      (window as any).webkit.messageHandlers.app_api.postMessage({
-        action: "google_login",
-      });
-    } else {
-      window.location.href = loginUrl;
-    }
-  };
   
   return (
     <div className="h-screen bg-gray-50 flex items-center justify-center">
@@ -130,7 +137,7 @@ const Login: React.FC = () => {
             <button
               type="button"
               className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
-              onClick={handleGoogleLogin}
+              onClick={googleLoginFetch}
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>

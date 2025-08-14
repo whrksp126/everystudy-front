@@ -1,3 +1,5 @@
+import { SERVER_URL } from "./server";
+
 
 export const getDeviceCookie = (cookieName: string) => {
   const cookieRegex = new RegExp(`(?:(?:^|.*;\\s*)${cookieName}\\s*=\\s*([^;]*).*$)|^.*$`);
@@ -50,6 +52,11 @@ const BROWSER_WEB_API = {
   get_appversion : ()=>{return '1.0.0'},
 
 
+
+  google_login : ()=>{return null},
+
+
+
   save_file_temp : (workbook_id: string, file_type: string) => {return `/${workbook_id}.${file_type}`},
   save_file_static : (workbook_id: string, file_name: string) => {return `/${workbook_id}.${file_name}`},
   is_file_exists : async (_path: string) => {return false},
@@ -86,6 +93,16 @@ export const WEBVIEW_API_MAP: Record<string, any> = {
   APP : OS_BROWSER,
   BROWSER : BROWSER_WEB_API,
 };
+
+// 구글 로그인
+export const osGoogleLogin = async () => {
+  if(DEVICE_DATA.OS === 'IOS'){
+    return await WEBVIEW_API_MAP[DEVICE_DATA.OS].google_login();
+  } else {
+    const url = `${SERVER_URL}/auth/google/login`;
+    window.location.href = url;
+  } 
+}
 
 // 파일 임시 저장
 export async function osSaveFileTemp(workbookId: string, fileType: string, fileIndex: number){
