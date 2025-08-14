@@ -43,6 +43,25 @@ const Login: React.FC = () => {
     // }, 1000);
   };
 
+  const handleGoogleLogin = () => {
+    const loginUrl =
+      // "https://rbgvzzal9l.execute-api.ap-northeast-2.amazonaws.com/auth/google/login";
+      "http://localhost:8000/auth/google/login";
+  
+    // iOS WebView 체크
+    if (
+      (window as any).webkit &&
+      (window as any).webkit.messageHandlers &&
+      (window as any).webkit.messageHandlers.app_api
+    ) {
+      (window as any).webkit.messageHandlers.app_api.postMessage({
+        action: "google_login",
+      });
+    } else {
+      window.location.href = loginUrl;
+    }
+  };
+  
   return (
     <div className="h-screen bg-gray-50 flex items-center justify-center">
       <form className="space-y-6" onSubmit={handleSubmit}>
@@ -111,6 +130,7 @@ const Login: React.FC = () => {
             <button
               type="button"
               className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+              onClick={handleGoogleLogin}
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>

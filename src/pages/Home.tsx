@@ -223,7 +223,7 @@ const Home: React.FC = () => {
     if(item.type === 'folder'){
       setFolderPath([...folderPath, item.id]);
     }
-    
+
     if(item.type === 'workbook'){
       window.location.href = `/learning?testType=WORK_BOOK&workbook_id=${item.id}`;
     }
@@ -442,7 +442,7 @@ const Home: React.FC = () => {
             {recentStudyBooks.slice(0, 2).map((book) => (
               <div
                 key={book.id}
-                className="flex flex-col gap-[12px] justify-end h-[248px] p-[10px] border border-gray-75 rounded-[8px]"
+                className="flex flex-col gap-[12px] justify-end flex-1 h-[248px] p-[10px] border border-gray-75 rounded-[8px]"
               >
                 <div className="flex items-center justify-center w-full h-[180px]">
                   <img
