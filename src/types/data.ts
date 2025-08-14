@@ -144,4 +144,33 @@ export interface DataContextType {
   getRecentStudyBooks: () => RecentStudyBook[];
   getReviewItems: () => ReviewItemHome[];
   getVocabularyItems: () => VocabularyItem[];
+  
+  // 추가된 속성들
+  myDocs: any;
+  getMyDocs: () => any;
+  setMyDocs: (docs: any) => void;
+  myDocsLoaded: boolean;
+  setUpdateMyDocsFolder: (folderId: string, updatedFolder: any) => void;
+  setUpdateMyDocsFolderMove: (folderId: string, targetFolderId: string) => void;
+  
+  userPaths: any;
+  getUserPaths: () => any;
+  userPathsLoaded: boolean;
+  
+  reviewNotes: any;
+  getReviewNotes: () => any;
+  reviewNotesLoaded: boolean;
+  
+  diyExams: any;
+  getDiyExams: () => any;
+  diyExamsLoaded: boolean;
+  
+  vocabs: any;
+  getVocabs: () => any;
+  vocabsLoaded: boolean;
+  
+  ebooks: any;
+  getEbooks: () => any;
+  getAllEbooks: () => any;
+  ebooksLoaded: boolean;
 } 

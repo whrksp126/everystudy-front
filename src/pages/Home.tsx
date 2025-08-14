@@ -230,18 +230,18 @@ const Home: React.FC = () => {
     const userPaths = getUserPaths();
     const userPath = userPaths.find((data: any) => data.workbook_id === item.id);
     console.log("userPath", userPath);
-    let isExists = false;
+    let allIsExists = false;
     for(const pdf of userPath.pdf){
-      const isExists = await osIsFileExists(pdf.user_file_path);
-      if(isExists){
+      const fileExists = await osIsFileExists(pdf.user_file_path);
+      if(fileExists){
         isExists = true;
         break;
       }
     }
     for(const audio of userPath.audio){
-      const isExists = await osIsFileExists(audio.user_file_path); 
-      console.log("isExists", isExists);
-      if(isExists){
+      const fileExists = await osIsFileExists(audio.user_file_path); 
+      console.log("isExists", fileExists);
+      if(fileExists){
         isExists = true;
         break;
       }

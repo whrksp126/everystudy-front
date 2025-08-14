@@ -85,7 +85,7 @@ const SetMyBookModal: React.FC<SetMyBookModalProps> = () => {
         
         // 선택된 인덱스에 파일 저장
         if (currentFileIndex.type === 'pdf') {
-          const pdfData = fileData as PdfData;
+          const pdfData = fileData as unknown as PdfData;
           arr[currentFileIndex.index] = {
             name: pdfData.name,
             path: pdfData.path,
@@ -96,7 +96,7 @@ const SetMyBookModal: React.FC<SetMyBookModalProps> = () => {
             size: pdfData.size
           };
         } else if (currentFileIndex.type === 'audio') {
-          const audioData = fileData as AudioData;
+          const audioData = fileData as unknown as AudioData;
           arr[currentFileIndex.index] = {
             name: audioData.name,
             path: audioData.path,
