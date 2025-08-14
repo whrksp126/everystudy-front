@@ -26,9 +26,7 @@ const SetWorkBookModal: React.FC<{item: any}> = ({item}) => {
   // 현재 선택된 인덱스 저장
   const [currentFileIndex, setCurrentFileIndex] = useState<{type: string, index: number} | null>(null);
 
-  const handleClose = () => {
-    popModal();
-  };
+
   useEffect(() => {
     // await를 사용하기 위해 내부에 async 함수를 선언하여 실행
     const userPaths = getUserPaths();
@@ -44,11 +42,11 @@ const SetWorkBookModal: React.FC<{item: any}> = ({item}) => {
           ...audio,
         })),
       });
-      checkFiles();
+      checkFilesExists();
     }
   }, [userPathsLoaded]);
 
-  const checkFiles = async () => {
+  const checkFilesExists = async () => {
     const userPaths = getUserPaths();
     const userPath = userPaths.find((data: any) => data.workbook_id === item.id);
     const newFileStates: { [key: string]: 'idle' | 'loading' | 'validation_error' | 'upload_error' | 'exists_error' | 'success' } = {};
@@ -83,9 +81,13 @@ const SetWorkBookModal: React.FC<{item: any}> = ({item}) => {
   useEffect(() => {
   }, [fileStates]);
 
+  const handleClose = () => {
+    popModal();
+  };
+
+
   // 파일 선택 결과 처리 (PDF, MP3 통합)
   useEffect(() => {
-
     if (fileSelector.selectedFile && currentFileIndex) {
       const fileData = fileSelector.selectedFile;
       

@@ -59,7 +59,7 @@ const BROWSER_WEB_API = {
 
   save_file_temp : (workbook_id: string, file_type: string) => {return `/${workbook_id}.${file_type}`},
   save_file_static : (workbook_id: string, file_name: string) => {return `/${workbook_id}.${file_name}`},
-  is_file_exists : async (_path: string) => {return false},
+  is_file_exists : async (_path: string) => {return true},
   get_file_list : () => {return []},
   delete_file : (_path: string) => {return true},
   delete_temp_all : ()=>{return true},

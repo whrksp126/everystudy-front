@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useModal } from '../../hooks/useModal';
 import { IconArrowLeft, IconUpload, IconNotification, IconPlusSquare, IconCheck, IconX } from '../../assets/Icon.tsx';
-import { osDeleteTempAll } from '../../utils/osFunction';
+import { osDeleteTempAll, osIsFileExists } from '../../utils/osFunction';
 import { useFileSelector } from '../../hooks/useFileSelector';
 import { FileSelectorModal } from '../FileSelectorModal';
 import { saveMyBookStandardDatafetch } from '../../api/myBook';
@@ -9,8 +9,8 @@ import { useData } from '../../contexts/DataContext';
 
 // PDF 데이터 타입 정의
 interface PdfData {
-  name: string;
-  path: string;
+  user_file_name: string;
+  user_file_path: string;
   file: File | null;
   thumbnail_blob: Blob;
   cover_img: string;
@@ -20,8 +20,8 @@ interface PdfData {
 
 // Audio 데이터 타입 정의
 interface AudioData {
-  name: string;
-  path: string;
+  user_file_name: string;
+  user_file_path: string;
   file: File | null;
   total_time: number;
 }
@@ -37,7 +37,7 @@ const SetMyBookModal: React.FC<SetMyBookModalProps> = ({item}) => {
   const { getUserPaths } = useData() as any;
   const [bookId, setBookId] = useState<string>('new');
   const [files, setFiles] = useState<any>({pdfs: [],audios: []});
-  const [fileStates, setFileStates] = useState<{[key: string]: 'idle' | 'loading' | 'validation_error' | 'upload_error' | 'success'}>({});
+  const [fileStates, setFileStates] = useState<{[key: string]: 'idle' | 'loading' | 'validation_error' | 'upload_error' | 'exists_error' | 'success'}>({});
   const [titleState, setTitleState] = useState<'idle' | 'error'>('idle');
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -52,14 +52,54 @@ const SetMyBookModal: React.FC<SetMyBookModalProps> = ({item}) => {
 
   useEffect(()=>{
     if (item) {
-      console.log("item", item);
       setBookId(item.id);
-
+      titleInputRef.current!.value = item.title;
       const userPaths = getUserPaths();
       const userPath = userPaths.find((data: any) => data.workbook_id === item.id);
-      console.log("userPath", userPath);
+      setFiles({
+        pdfs: [...files.pdfs, ...userPath.pdf],
+        audios: [...files.audios, ...userPath.audio]
+      })
+      checkFilesExists();
     }
   },[item])
+
+  const checkFilesExists = async () => {
+    const userPaths = getUserPaths();
+    const userPath = userPaths.find((data: any) => data.workbook_id === item.id);
+    const newFileStates: { [key: string]: 'idle' | 'loading' | 'validation_error' | 'upload_error' | 'exists_error' | 'success' } = {};
+    // PDF 파일 존재 여부 확인
+    for (let index = 0; index < userPath.pdf.length; index++) {
+      const pdf = userPath.pdf[index];
+      const isFileExists = await osIsFileExists(pdf.user_file_path);
+      if (isFileExists) {
+        newFileStates[`pdf_${index}`] = 'success';
+      } else {
+        newFileStates[`pdf_${index}`] = 'exists_error';
+      }
+    }
+    // 오디오 파일 존재 여부 확인
+    for (let index = 0; index < userPath.audio.length; index++) {
+      const audio = userPath.audio[index];
+      const isFileExists = await osIsFileExists(audio.user_file_path);
+      if (isFileExists) {
+        newFileStates[`audio_${index}`] = 'success';
+      } else {
+        newFileStates[`audio_${index}`] = 'exists_error';
+      }
+    }
+
+    setFileStates((prev) => ({
+      ...prev,
+      ...newFileStates,
+    }));
+
+  }
+
+
+  useEffect(()=>{
+    console.log("files", files);
+  },[files])
 
 
   // 모달 닫기
@@ -102,8 +142,8 @@ const SetMyBookModal: React.FC<SetMyBookModalProps> = ({item}) => {
         if (currentFileIndex.type === 'pdf') {
           const pdfData = fileData as unknown as PdfData;
           arr[currentFileIndex.index] = {
-            name: pdfData.name,
-            path: pdfData.path,
+            user_file_name: pdfData.user_file_name,
+            user_file_path: pdfData.user_file_path,
             file: pdfData.file,
             thumbnail_blob: pdfData.thumbnail_blob,
             cover_img: pdfData.cover_img,
@@ -113,8 +153,8 @@ const SetMyBookModal: React.FC<SetMyBookModalProps> = ({item}) => {
         } else if (currentFileIndex.type === 'audio') {
           const audioData = fileData as unknown as AudioData;
           arr[currentFileIndex.index] = {
-            name: audioData.name,
-            path: audioData.path,
+            user_file_name: audioData.user_file_name,
+            user_file_path: audioData.user_file_path,
             file: audioData.file,
             total_time: audioData.total_time
           };
@@ -125,7 +165,7 @@ const SetMyBookModal: React.FC<SetMyBookModalProps> = ({item}) => {
       });
       
       setFileStates(prev => ({ ...prev, [`${currentFileIndex.type}_${currentFileIndex.index}`]: 'success' }));
-      setLastAddedIndex({ type: currentFileIndex.type, index: currentFileIndex.index });
+      // setLastAddedIndex({ type: currentFileIndex.type, index: currentFileIndex.index });
       setCurrentFileIndex(null);
       fileSelector.setSelectedFile(null);
     }
@@ -218,13 +258,30 @@ const SetMyBookModal: React.FC<SetMyBookModalProps> = ({item}) => {
   }
 
   // 상태 초기화 함수(현재 업로드 중인 파일만 idle로)
-  const resetFileUploadStates = () => {
+  const resetFileUploadStates = async () => {
     if (!currentFileIndex) return;
     const { type, index } = currentFileIndex;
-    setFileStates(prev => ({
-      ...prev,
-      [`${type}_${index}`]: files[type + 's'] && files[type + 's'][index] ? 'success' : 'idle'
-    }));
+    const fileItem = files[type + 's'] && files[type + 's'][index];
+    if (fileItem && fileItem.user_file_path) {
+      try {
+        // osIsFileExists는 utils에서 import 되어 있다고 가정
+        const isExists = await osIsFileExists(fileItem.user_file_path);
+        setFileStates(prev => ({
+          ...prev,
+          [`${type}_${index}`]: isExists ? 'success' : 'exists_error'
+        }));
+      } catch (_e) {
+        setFileStates(prev => ({
+          ...prev,
+          [`${type}_${index}`]: 'exists_error'
+        }));
+      }
+    } else {
+      setFileStates(prev => ({
+        ...prev,
+        [`${type}_${index}`]: 'idle'
+      }));
+    }
     setCurrentFileIndex(null);
   };
 
@@ -288,7 +345,7 @@ const SetMyBookModal: React.FC<SetMyBookModalProps> = ({item}) => {
               className={`flex-1 w-full h-[58px] pl-[16px] pr-[12px] border rounded-[10px] text-16m ${
                 titleState === 'error'
                   ? 'border-red-200 bg-red-25 text-red-400 placeholder:text-red-400' 
-                  : 'border-[#0000000a] bg-gray-50 text-gray-200'
+                  : 'border-[#0000000a] bg-gray-50 text-[#28272B]'
                 }
                 max-sm:flex-none
               `}
@@ -361,7 +418,7 @@ const SetMyBookModal: React.FC<SetMyBookModalProps> = ({item}) => {
                     className={`flex items-center gap-[8px] flex-1 h-[58px] p-[20px] border rounded-[10px] text-16m ${
                       fileStates[`pdf_${index}`] === 'loading'
                         ? 'border-blue-200 bg-blue-25 text-blue-400' 
-                        : fileStates[`pdf_${index}`] === 'upload_error'
+                        : fileStates[`pdf_${index}`] === 'upload_error' || fileStates[`pdf_${index}`] === 'exists_error'
                         ? 'border-red-200 bg-red-25 text-red-400'
                         : 'border-blue-50 bg-blue-25 text-gray-400'
                     }`}
@@ -376,10 +433,15 @@ const SetMyBookModal: React.FC<SetMyBookModalProps> = ({item}) => {
                         <IconUpload width={24} height={24} className="text-red-400" />
                         <span className="text-14r text-red-400">파일 업로드 실패, 다시 시도해 주세요.</span>
                       </>
+                    ) : fileStates[`pdf_${index}`] === 'exists_error' ? (
+                      <>
+                        <IconCheck width={24} height={24} className="text-red-400" />
+                        <span className="flex-1 text-14r text-red-400">{file.user_file_name}</span>
+                      </>
                     ) : (
                       <>
                         <IconCheck width={24} height={24} className="text-primary-blue" />
-                        <span className="flex-1 text-14r text-primary-blue">{file.name}</span>
+                        <span className="flex-1 text-14r text-primary-blue">{file.user_file_name}</span>
                         <button onClick={(e) => {
                           e.stopPropagation();
                           handleFileDelete('pdf', index);
@@ -477,7 +539,7 @@ const SetMyBookModal: React.FC<SetMyBookModalProps> = ({item}) => {
                   <div 
                     onClick={() => handleFileUpload('audio', index)}
                     className={`flex items-center gap-[8px] flex-1 h-[58px] p-[20px] border rounded-[10px] text-16m ${
-                      fileStates[`audio_${index}`] === 'loading'
+                      fileStates[`audio_${index}`] === 'loading' || fileStates[`audio_${index}`] === 'exists_error'
                         ? 'border-blue-200 bg-blue-25 text-blue-400' 
                         : fileStates[`audio_${index}`] === 'upload_error'
                         ? 'border-red-200 bg-red-25 text-red-400'
@@ -494,10 +556,15 @@ const SetMyBookModal: React.FC<SetMyBookModalProps> = ({item}) => {
                         <IconUpload width={24} height={24} className="text-red-400" />
                         <span className="text-14r text-red-400">파일 업로드 실패, 다시 시도해 주세요.</span>
                       </>
+                    ) : fileStates[`audio_${index}`] === 'exists_error' ? (
+                      <>
+                        <IconCheck width={24} height={24} className="text-red-400" />
+                        <span className="flex-1 text-14r text-red-400">{file.user_file_name}</span>
+                      </>
                     ) : (
                       <>
                         <IconCheck width={24} height={24} className="text-primary-blue" />
-                        <span className="flex-1 text-14r text-primary-blue">{file.name}</span>
+                        <span className="flex-1 text-14r text-primary-blue">{file.user_file_name}</span>
                         <button onClick={(e) => {
                           e.stopPropagation();
                           handleFileDelete('audio', index);

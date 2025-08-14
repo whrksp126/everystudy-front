@@ -24,20 +24,20 @@ export const saveMyBookStandardDatafetch = async (title: string, bookId: string,
       device_id : getDeviceId(), // 사용자 기기 타입
 
       file_path: {
-        pdf: pdfList.map(({ file_id, name, path, page_count, size }: {file_id: string, name: string, path: string, page_count: number, size: {mw: number, mh: number}}, index: number) => ({
+        pdf: pdfList.map(({ file_id, user_file_name, user_file_path, page_count, size }: {file_id: string, user_file_name: string, user_file_path: string, page_count: number, size: {mw: number, mh: number}}, index: number) => ({
           file_id, // 파일 id
           page_count: page_count, // 파일 총 페이지 수
           size : size, // 파일 용량
           priority : index + 1, 
-          user_file_name: name, 
-          user_file_path: path, 
+          user_file_name: user_file_name, 
+          user_file_path: user_file_path, 
         })),
-        audio: audioList.map(({ file_id, name, path, total_time }: {file_id: string, name: string, path: string, total_time: number}, index: number) => ({
+        audio: audioList.map(({ file_id, user_file_name, user_file_path, total_time }: {file_id: string, user_file_name: string, user_file_path: string, total_time: number}, index: number) => ({
           file_id, 
           total_time : total_time, 
           priority : index + 1, 
-          user_file_name: name, 
-          user_file_path: path, 
+          user_file_name: user_file_name, 
+          user_file_path: user_file_path, 
         })),
       },
     },
@@ -75,20 +75,20 @@ export const editMyBookStandardDatafetch = async (title: string, bookId: string,
       device_id : getDeviceId(), // 사용자 기기 타입
 
       file_path: {
-        pdf: pdfList.map(({ file_id, name, path, page_count, size }: {file_id: string, name: string, path: string, page_count: number, size: {mw: number, mh: number}}, index: number) => ({
+        pdf: pdfList.map(({ file_id, user_file_name, user_file_path, page_count, size }: {file_id: string, user_file_name: string, user_file_path: string, page_count: number, size: {mw: number, mh: number}}, index: number) => ({
           file_id, // 파일 id
           page_count: page_count, // 파일 총 페이지 수
           size : size, // 파일 용량
           priority : index + 1, 
-          user_file_name: name, 
-          user_file_path: path, 
+          user_file_name: user_file_name, 
+          user_file_path: user_file_path, 
         })),
-        audio: audioList.map(({ file_id, name, path, total_time }: {file_id: string, name: string, path: string, total_time: number}, index: number) => ({
+        audio: audioList.map(({ file_id, user_file_name, user_file_path, total_time }: {file_id: string, user_file_name: string, user_file_path: string, total_time: number}, index: number) => ({
           file_id, 
           total_time : total_time, 
           priority : index + 1, 
-          user_file_name: name, 
-          user_file_path: path, 
+          user_file_name: user_file_name, 
+          user_file_path: user_file_path, 
         })),
       },
     },
