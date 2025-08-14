@@ -29,6 +29,7 @@ interface AudioData {
 
 interface SetMyBookModalProps {
   onClose?: () => void;
+  item: any;
 }
 
 const SetMyBookModal: React.FC<SetMyBookModalProps> = ({item}) => {
