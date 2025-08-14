@@ -52,7 +52,7 @@ const BROWSER_WEB_API = {
 
   save_file_temp : (workbook_id: string, file_type: string) => {return `/${workbook_id}.${file_type}`},
   save_file_static : (workbook_id: string, file_name: string) => {return `/${workbook_id}.${file_name}`},
-  is_file_exists : async (_path: string) => {return true},
+  is_file_exists : async (_path: string) => {return false},
   get_file_list : () => {return []},
   delete_file : (_path: string) => {return true},
   delete_temp_all : ()=>{return true},
@@ -131,6 +131,17 @@ export async function osSaveFileStatic(workbookId: string, fileName: string){
     }
   };
 }
+
+// new 파일 경로 정상 확인
+export async function osIsFileExists(path: string){
+  if (DEVICE_DATA.OS === 'BROWSER') {
+    return await WEBVIEW_API_MAP[DEVICE_DATA.OS].is_file_exists(path);
+  } else {
+    return await WEBVIEW_API_MAP[DEVICE_DATA.OS].is_file_exists(path);
+  };
+};
+
+
 
 // 앱 내장 임시 저장소 파일 삭제
 export async function osDeleteTempAll(){

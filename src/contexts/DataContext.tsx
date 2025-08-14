@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import type { DataContextType } from '../types/data';
 import { SERVER_URL } from '../utils/server.js';
 import { fetchDataAsync } from '../utils/common.js';
+import { getDeviceId } from "../utils/localStorage";
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
@@ -15,6 +16,10 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
   // 유저 정보 (현재 미사용)
   // const [userInfo, setUserInfo] = useState<any>(null);
   // const [userInfoLoaded, setUserInfoLoaded] = useState<boolean>(false);
+
+  const [userPaths, setUserPaths] = useState<any>(null);
+  const [userPathsLoaded, setUserPathsLoaded] = useState<boolean>(false);
+
   const [myDocs, setMyDocs] = useState<any>(null);
   const [myDocsLoaded, setMyDocsLoaded] = useState<boolean>(false);
   const [vocabs, setVocabs] = useState<any>(null);
@@ -29,9 +34,16 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
   useEffect(() => {
     initFetchData();
   }, []);
+
+  useEffect(() => {
+    if(userPathsLoaded){
+      console.log(userPaths);
+    }
+  }, [userPathsLoaded]);
   
   const initFetchData = async () => {
     await getFetchUserInfo();
+    await getFetchUserPaths();
     await getFetchMyDocs();
     await getFetchVocabs();
     await getFetchEbooks();
@@ -48,10 +60,20 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     // if(userInfo){
     //   setUserInfo(userInfo);
     //   setUserInfoLoaded(true);
-    // }
+    // }    
+  };
 
-
-    
+  const getFetchUserPaths = async () => {
+    const url = `${SERVER_URL}/folder/user_path_list`;
+    const method = 'GET';
+    const data = {
+      device_id: getDeviceId(),
+    };
+    const userPaths = await fetchDataAsync(url, method, data);
+    if(userPaths){
+      setUserPaths(userPaths);
+      setUserPathsLoaded(true);
+    }
   };
 
   // 내 문서 조회
@@ -414,6 +436,10 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     return myDocs;
   }, [myDocs]);
 
+  const getUserPaths = useCallback(() => {
+    return userPaths;
+  }, [userPaths]);
+
   const getReviewNotes = useCallback(() => {
     return reviewNotes;
   }, [reviewNotes]);
@@ -457,6 +483,12 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     myDocsLoaded,
     setUpdateMyDocsFolder,
     setUpdateMyDocsFolderMove,
+
+    userPaths,
+    getUserPaths,
+    userPathsLoaded,
+
+
     reviewNotes,
     getReviewNotes,
     reviewNotesLoaded,

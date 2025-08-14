@@ -9,6 +9,7 @@ import { useModal } from '../hooks/useModal'
 import BookSearchModal from '../components/Modal/BookSearchModal';
 import { useData } from '../contexts/DataContext';
 import SetFolderModal from '../components/Modal/SetFolderModal';
+import { osIsFileExists } from '../utils/osFunction';
 
 import {getFolderSvg} from '../utils/folderSvg';
 import { 
@@ -117,7 +118,7 @@ const Home: React.FC = () => {
     myDocsLoaded, getMyDocs, myDocs, setUpdateMyDocsFolderMove,
     vocabsLoaded, getVocabs,
     reviewNotesLoaded, getReviewNotes,
-    
+    getUserPaths,
   } = useData() as any;
 
 
@@ -210,7 +211,7 @@ const Home: React.FC = () => {
   };
 
   // 폴더 추가
-  const handleFolderRegistration = () => {
+  const handleFolderRegistration = async () => {
     openModal(SetFolderModal, { type: 'add', folderPath: folderPath }, { 
       preserveState: true, 
       keepInDOM: true,
@@ -219,11 +220,33 @@ const Home: React.FC = () => {
   }
 
   // 아이템 클릭
-  const handleClickItem = (item: any) => {
+  const handleClickItem = async (item: any) => {
     if(item.type === 'folder'){
       setFolderPath([...folderPath, item.id]);
     }
-    
+
+    console.log("item", item);
+
+    const userPaths = getUserPaths();
+    const userPath = userPaths.find((data: any) => data.workbook_id === item.id);
+    console.log("userPath", userPath);
+    let isExists = false;
+    for(const pdf of userPath.pdf){
+      const isExists = await osIsFileExists(pdf.user_file_path);
+      if(isExists){
+        isExists = true;
+        break;
+      }
+    }
+    for(const audio of userPath.audio){
+      const isExists = await osIsFileExists(audio.user_file_path); 
+      console.log("isExists", isExists);
+      if(isExists){
+        isExists = true;
+        break;
+      }
+    }
+
     if(item.type === 'workbook'){
       window.location.href = `/learning?testType=WORK_BOOK&workbook_id=${item.id}`;
     }
@@ -442,7 +465,7 @@ const Home: React.FC = () => {
             {recentStudyBooks.slice(0, 2).map((book) => (
               <div
                 key={book.id}
-                className="flex flex-col gap-[12px] justify-end h-[248px] p-[10px] border border-gray-75 rounded-[8px]"
+                className="flex flex-col gap-[12px] justify-end flex-1 h-[248px] p-[10px] border border-gray-75 rounded-[8px]"
               >
                 <div className="flex items-center justify-center w-full h-[180px]">
                   <img

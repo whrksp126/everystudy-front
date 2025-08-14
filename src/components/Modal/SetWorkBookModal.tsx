@@ -6,13 +6,16 @@ import WarringNoWorkBookAlert from '../Alert/WarringNoWorkBookAlert';
 import { useFileSelector } from '../../hooks/useFileSelector';
 import { FileSelectorModal } from '../FileSelectorModal';
 import { setWorkBookPathfetch } from '../../api/workbook';
+import { useData } from '../../contexts/DataContext';
+import { osIsFileExists } from '../../utils/osFunction';
 
 const SetWorkBookModal: React.FC<{item: any}> = ({item}) => {
   const { popModal, closeModal } = useModal();
   const { openAlert } = useAlert();
   const [workBook] = useState<any>(item);
   const [files, setFiles] = useState<any>(item.files);
-  const [fileStates, setFileStates] = useState<{[key: string]: 'idle' | 'loading' | 'validation_error' | 'upload_error' | 'success'}>({});
+  const [fileStates, setFileStates] = useState<{[key: string]: 'idle' | 'loading' | 'validation_error' | 'upload_error' | 'exists_error' | 'success'}>({});
+  const { getUserPaths, userPathsLoaded } = useData();
   
   // const scrollContainerRef = useRef<HTMLDivElement>(null);
   // const [lastAddedIndex, setLastAddedIndex] = useState<{type: string, index: number} | null>(null);
@@ -26,6 +29,65 @@ const SetWorkBookModal: React.FC<{item: any}> = ({item}) => {
   const handleClose = () => {
     popModal();
   };
+  useEffect(() => {
+    // await를 사용하기 위해 내부에 async 함수를 선언하여 실행
+    const userPaths = getUserPaths();
+    const userPath = userPaths.find((data: any) => data.workbook_id === item.id);
+    if (userPath) {
+      setFiles({
+        pdfs: userPath.pdf.map((pdf: any, index: number) => ({
+          ...files.pdfs[index],
+          ...pdf,
+        })),
+        audios: userPath.audio.map((audio: any, index: number) => ({
+          ...files.audios[index],
+          ...audio,
+        })),
+      });
+      checkFiles();
+    }
+  }, [userPathsLoaded]);
+
+  const checkFiles = async () => {
+    const userPaths = getUserPaths();
+    const userPath = userPaths.find((data: any) => data.workbook_id === item.id);
+    const newFileStates: { [key: string]: 'idle' | 'loading' | 'validation_error' | 'upload_error' | 'exists_error' | 'success' } = {};
+    // PDF 파일 존재 여부 확인
+    for (let index = 0; index < userPath.pdf.length; index++) {
+      const pdf = userPath.pdf[index];
+      const isFileExists = await osIsFileExists(pdf.user_file_path);
+      if (isFileExists) {
+        newFileStates[`pdf_${index}`] = 'success';
+      } else {
+        newFileStates[`pdf_${index}`] = 'exists_error';
+      }
+    }
+    // 오디오 파일 존재 여부 확인
+    for (let index = 0; index < userPath.audio.length; index++) {
+      const audio = userPath.audio[index];
+      const isFileExists = await osIsFileExists(audio.user_file_path);
+      if (isFileExists) {
+        newFileStates[`audio_${index}`] = 'success';
+      } else {
+        newFileStates[`audio_${index}`] = 'exists_error';
+      }
+    }
+
+    setFileStates((prev) => ({
+      ...prev,
+      ...newFileStates,
+    }));
+  }
+
+
+
+  useEffect(() => {
+    console.log("files,",files)
+  }, [files]);
+
+
+  useEffect(() => {
+  }, [fileStates]);
 
   // 파일 선택 결과 처리 (PDF, MP3 통합)
   useEffect(() => {
@@ -43,8 +105,8 @@ const SetWorkBookModal: React.FC<{item: any}> = ({item}) => {
           const pdfData = fileData as any;
           arr[currentFileIndex.index] = {
             ...arr[currentFileIndex.index],
-            name: pdfData.name,
-            path: pdfData.path,
+            user_file_name: pdfData.user_file_name,
+            user_file_path: pdfData.user_file_path,
             file: pdfData.file,
             thumbnail_blob: pdfData.thumbnail_blob,
             cover_img: pdfData.cover_img,
@@ -55,8 +117,8 @@ const SetWorkBookModal: React.FC<{item: any}> = ({item}) => {
           const audioData = fileData as any;
           arr[currentFileIndex.index] = {
             ...arr[currentFileIndex.index],
-            name: audioData.name,
-            path: audioData.path,
+            user_file_name: audioData.user_file_name,
+            user_file_path: audioData.user_file_path,
             file: audioData.file,
             total_time: audioData.total_time
           };
@@ -124,13 +186,31 @@ const SetWorkBookModal: React.FC<{item: any}> = ({item}) => {
   };
 
   // 상태 초기화 함수(현재 업로드 중인 파일만 idle로)
-  const resetFileUploadStates = () => {
+  // user_file_path가 있으면 isFileExists로 실제 파일 존재 여부 확인 후 상태 업데이트
+  const resetFileUploadStates = async () => {
     if (!currentFileIndex) return;
     const { type, index } = currentFileIndex;
-    setFileStates(prev => ({
-      ...prev,
-      [`${type}_${index}`]: files[type + 's'] && files[type + 's'][index].path ? 'success' : 'idle'
-    }));
+    const fileItem = files[type + 's'] && files[type + 's'][index];
+    if (fileItem && fileItem.user_file_path) {
+      try {
+        // osIsFileExists는 utils에서 import 되어 있다고 가정
+        const isExists = await osIsFileExists(fileItem.user_file_path);
+        setFileStates(prev => ({
+          ...prev,
+          [`${type}_${index}`]: isExists ? 'success' : 'exists_error'
+        }));
+      } catch (_e) {
+        setFileStates(prev => ({
+          ...prev,
+          [`${type}_${index}`]: 'exists_error'
+        }));
+      }
+    } else {
+      setFileStates(prev => ({
+        ...prev,
+        [`${type}_${index}`]: 'idle'
+      }));
+    }
     setCurrentFileIndex(null);
   };
 
@@ -252,7 +332,7 @@ const SetWorkBookModal: React.FC<{item: any}> = ({item}) => {
               text-16m ${
                 fileStates[`pdf_${index}`] === 'loading' || fileStates[`pdf_${index}`] === 'success'
                   ? 'border-blue-200 bg-blue-25 text-blue-400' 
-                  : fileStates[`pdf_${index}`] === 'validation_error' || fileStates[`pdf_${index}`] === 'upload_error'
+                  : fileStates[`pdf_${index}`] === 'validation_error' || fileStates[`pdf_${index}`] === 'upload_error' || fileStates[`pdf_${index}`] === 'exists_error'
                   ? 'border-red-200 bg-red-25 text-red-400'
                   : 'border-gray-75 bg-gray-25 text-gray-400'
               }
@@ -278,9 +358,14 @@ const SetWorkBookModal: React.FC<{item: any}> = ({item}) => {
                     <IconUpload width={24} height={24} className="text-red-400 hidden max-sm:block" />
                     <span className="text-center text-16r text-red-400 hidden max-sm:block">파일 업로드 실패<br />다시 시도해 주세요.</span>
                   </>
+                ) : fileStates[`pdf_${index}`] === 'exists_error' ? (
+                  <>
+                    <span className="text-center text-16r text-red-400 max-sm:hidden">{file.user_file_name}<br />파일이 존재하지 않습니다.</span>
+                    <span className="text-center text-16r text-red-400 hidden max-sm:block">{file.user_file_name}<br />파일이 존재하지 않습니다.</span>
+                  </>
                 ) : fileStates[`pdf_${index}`] === 'success' ? (
                   <>
-                    <span className="text-center text-16r">{file.name}</span>
+                    <span className="text-center text-16r">{file.user_file_name}</span>
                     <button 
                       className="absolute top-[12px] right-[12px] max-sm:top-[50%] max-sm:translate-y-[-50%]"
                       onClick={(e) => {
@@ -319,7 +404,7 @@ const SetWorkBookModal: React.FC<{item: any}> = ({item}) => {
               text-16m ${
                 fileStates[`audio_${index}`] === 'loading' || fileStates[`audio_${index}`] === 'success'
                   ? 'border-blue-200 bg-blue-25 text-blue-400' 
-                  : fileStates[`audio_${index}`] === 'validation_error' || fileStates[`audio_${index}`] === 'upload_error'
+                  : fileStates[`audio_${index}`] === 'validation_error' || fileStates[`audio_${index}`] === 'upload_error' || fileStates[`audio_${index}`] === 'exists_error'
                   ? 'border-red-200 bg-red-25 text-red-400'
                   : 'border-gray-75 bg-gray-25 text-gray-400'
                 }
@@ -346,9 +431,14 @@ const SetWorkBookModal: React.FC<{item: any}> = ({item}) => {
                     <IconUpload width={24} height={24} className="text-red-400 hidden max-sm:block" />
                     <span className="text-center text-16r text-red-400 hidden max-sm:block">파일 업로드 실패<br />다시 시도해 주세요.</span>
                   </>
+                ) : fileStates[`audio_${index}`] === 'exists_error' ? (
+                  <>
+                    <span className="text-center text-16r text-red-400 max-sm:hidden">{file.user_file_name}<br />파일이 존재하지 않습니다.</span>
+                    <span className="text-center text-16r text-red-400 hidden max-sm:block">{file.user_file_name}<br />파일이 존재하지 않습니다.</span>
+                  </>
                 ) : fileStates[`audio_${index}`] === 'success' ? (
                   <>
-                    <span className="text-center text-16r">{file.name}</span>
+                    <span className="text-center text-16r">{file.user_file_name}</span>
                     <button 
                       className="absolute top-[12px] right-[12px] max-sm:top-[50%] max-sm:translate-y-[-50%]"
                       onClick={(e) => {

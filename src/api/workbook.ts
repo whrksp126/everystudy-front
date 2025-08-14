@@ -16,17 +16,17 @@ export const setWorkBookPathfetch = async (workBook: any, files: any) => {
         pdf : [
           ...files.pdfs.map((d: any) => ({
             file_id : d.id || null,
-            user_has_file_id : d.user_has_file_id || null,
-            user_file_name : d.name,
-            user_file_path : d.path,
+            user_file_id : d.user_file_id || null,
+            user_file_name : d.user_filename,
+            user_file_path : d.user_filepath,
           })),
         ],
         audio : [
           ...files.audios.map((d: any) => ({
             file_id : d.id || null,
-            user_has_file_id : d.user_has_file_id || null,
-            user_file_name : d.name,
-            user_file_path : d.path,
+            user_file_id : d.user_file_id || null,
+            user_file_name : d.user_filename,
+            user_file_path : d.user_filepath,
           })),
         ]
       }
@@ -62,20 +62,22 @@ export const editWorkBookStandardDatafetch = async (title: string, bookId: strin
       device_id : DEVICE_DATA.ID, // 사용자 기기 타입
 
       file_path: {
-        pdf: pdfList.map(({ file_id, name, path, page_count, size }: {file_id: string, name: string, path: string, page_count: number, size: {mw: number, mh: number}}, index: number) => ({
+        pdf: pdfList.map(({ file_id, user_file_id, user_file_name, user_file_path, page_count, size }: {file_id: string, user_file_id: string, user_file_name: string, user_file_path: string, page_count: number, size: {mw: number, mh: number}}, index: number) => ({
           file_id, // 파일 id
+          user_file_id: user_file_id,
           page_count: page_count, // 파일 총 페이지 수
           size : size, // 파일 용량
           priority : index + 1, 
-          user_file_name: name, 
-          user_file_path: path, 
+          user_file_name: user_file_name, 
+          user_file_path: user_file_path, 
         })),
-        audio: audioList.map(({ file_id, name, path, total_time }: {file_id: string, name: string, path: string, total_time: number}, index: number) => ({
+        audio: audioList.map(({ file_id, user_file_id, user_file_name, user_file_path, total_time }: {file_id: string, user_file_id: string, user_file_name: string, user_file_path: string, total_time: number}, index: number) => ({
           file_id, 
+          user_file_id: user_file_id,
           total_time : total_time, 
           priority : index + 1, 
-          user_file_name: name, 
-          user_file_path: path, 
+          user_file_name: user_file_name, 
+          user_file_path: user_file_path, 
         })),
       },
     },

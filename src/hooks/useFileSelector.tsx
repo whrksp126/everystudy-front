@@ -6,8 +6,8 @@ import { getAppPdfFileData, getAppAudioFileData } from '../utils/common';
 import { DEVICE_DATA } from '../utils/osFunction';
 
 interface PdfData {
-  name: string;
-  path: string;
+  user_file_name: string;
+  user_file_path: string;
   file: File | null;
   thumbnail_blob: Blob;
   cover_img: string;
@@ -16,8 +16,8 @@ interface PdfData {
 }
 
 interface AudioData {
-  name: string;
-  path: string;
+  user_file_name: string;
+  user_file_path: string;
   file: File | null;
   total_time: number;
 }
@@ -68,8 +68,8 @@ export const useFileSelector = (): UseFileSelectorReturn => {
           const thumbnailBlob = getUriToBlobToFile(dataUrl);
 
           resolve({
-            name: file.name,
-            path: URL.createObjectURL(file),
+            user_file_name: file.name,
+            user_file_path: URL.createObjectURL(file),
             file,
             thumbnail_blob: thumbnailBlob,
             cover_img: dataUrl,
@@ -96,8 +96,8 @@ export const useFileSelector = (): UseFileSelectorReturn => {
       audio.addEventListener('loadedmetadata', () => {
         const total_time = audio.duration;
         resolve({
-          name: file.name,
-          path: objectURL,
+          user_file_name: file.name,
+          user_file_path: objectURL,
           file: file,
           total_time: total_time
         });
@@ -122,8 +122,8 @@ export const useFileSelector = (): UseFileSelectorReturn => {
         if (type === 'pdf') {
           const pdfData = await getAppPdfFileData({filePath, fileName});
           setSelectedFile({
-            name: pdfData.user_file_name,
-            path: pdfData.user_file_path,
+            user_file_name: pdfData.user_file_name,
+            user_file_path: pdfData.user_file_path,
             file: null,
             thumbnail_blob: pdfData.thumbnail_blob,
             cover_img: pdfData.cover_img,
@@ -133,8 +133,8 @@ export const useFileSelector = (): UseFileSelectorReturn => {
         } else if (type === 'audio') {
           const audioData = await getAppAudioFileData({filePath, fileName});
           setSelectedFile({
-            name: audioData.user_file_name,
-            path: audioData.user_file_path,
+            user_file_name: audioData.user_file_name,
+            user_file_path: audioData.user_file_path,
             file: null,
             total_time: audioData.total_time
           });
