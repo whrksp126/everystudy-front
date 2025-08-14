@@ -29,7 +29,7 @@ interface AudioData {
 
 interface SetMyBookModalProps {
   onClose?: () => void;
-  item: any;
+  item?: any;
 }
 
 const SetMyBookModal: React.FC<SetMyBookModalProps> = ({item}) => {
@@ -51,14 +51,14 @@ const SetMyBookModal: React.FC<SetMyBookModalProps> = ({item}) => {
 
 
   useEffect(()=>{
-    console.log("item", item);
-    setBookId(item.id);
+    if (item) {
+      console.log("item", item);
+      setBookId(item.id);
 
-    const userPaths = getUserPaths();
-    const userPath = userPaths.find((data: any) => data.workbook_id === item.id);
-    console.log("userPath", userPath);
-
-
+      const userPaths = getUserPaths();
+      const userPath = userPaths.find((data: any) => data.workbook_id === item.id);
+      console.log("userPath", userPath);
+    }
   },[item])
 
 
