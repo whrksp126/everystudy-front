@@ -5,7 +5,7 @@ import { osDeleteTempAll } from '../../utils/osFunction';
 import { useFileSelector } from '../../hooks/useFileSelector';
 import { FileSelectorModal } from '../FileSelectorModal';
 import { saveMyBookStandardDatafetch } from '../../api/myBook';
-
+import { useData } from '../../contexts/DataContext';
 
 // PDF 데이터 타입 정의
 interface PdfData {
@@ -31,9 +31,10 @@ interface SetMyBookModalProps {
   onClose?: () => void;
 }
 
-const SetMyBookModal: React.FC<SetMyBookModalProps> = () => {
+const SetMyBookModal: React.FC<SetMyBookModalProps> = ({item}) => {
   const { popModal } = useModal();
-  const [bookId] = useState<string>('new');
+  const { getUserPaths } = useData() as any;
+  const [bookId, setBookId] = useState<string>('new');
   const [files, setFiles] = useState<any>({pdfs: [],audios: []});
   const [fileStates, setFileStates] = useState<{[key: string]: 'idle' | 'loading' | 'validation_error' | 'upload_error' | 'success'}>({});
   const [titleState, setTitleState] = useState<'idle' | 'error'>('idle');
@@ -46,6 +47,19 @@ const SetMyBookModal: React.FC<SetMyBookModalProps> = () => {
   
   // 현재 선택된 인덱스 저장
   const [currentFileIndex, setCurrentFileIndex] = useState<{type: string, index: number} | null>(null);
+
+
+  useEffect(()=>{
+    console.log("item", item);
+    setBookId(item.id);
+
+    const userPaths = getUserPaths();
+    const userPath = userPaths.find((data: any) => data.workbook_id === item.id);
+    console.log("userPath", userPath);
+
+
+  },[item])
+
 
   // 모달 닫기
   const handleClose = async () => {

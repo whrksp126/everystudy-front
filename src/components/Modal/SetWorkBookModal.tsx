@@ -80,12 +80,6 @@ const SetWorkBookModal: React.FC<{item: any}> = ({item}) => {
   }
 
 
-
-  useEffect(() => {
-    console.log("files,",files)
-  }, [files]);
-
-
   useEffect(() => {
   }, [fileStates]);
 
