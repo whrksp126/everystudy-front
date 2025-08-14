@@ -10,7 +10,8 @@ import BookSearchModal from '../components/Modal/BookSearchModal';
 import { useData } from '../contexts/DataContext';
 import SetFolderModal from '../components/Modal/SetFolderModal';
 import { osIsFileExists } from '../utils/osFunction';
-
+import SetWorkBookModal from '../components/Modal/SetWorkBookModal';
+import SetMyBookModal from '../components/Modal/SetMyBookModal';
 import {getFolderSvg} from '../utils/folderSvg';
 import { 
   IconPlus, 
@@ -104,7 +105,7 @@ const Home: React.FC = () => {
   const [viewMode, setViewMode] = useState<'category' | 'list'>('category');
   const { openOverflowMenu } = useOverflowMenu();
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const { openModal } = useModal();
+  const { openModal, pushModal } = useModal();
 
   const [recentStudyBooks, setRecentStudyBooks] = useState<any[]>([]);
   const [reviewNotes, setReviewNotes] = useState<any[]>([]);
@@ -119,6 +120,7 @@ const Home: React.FC = () => {
     vocabsLoaded, getVocabs,
     reviewNotesLoaded, getReviewNotes,
     getUserPaths,
+    getAllEbooks,
   } = useData() as any;
 
 
@@ -224,29 +226,47 @@ const Home: React.FC = () => {
     if(item.type === 'folder'){
       setFolderPath([...folderPath, item.id]);
     }
-
-    console.log("item", item);
-
     const userPaths = getUserPaths();
     const userPath = userPaths.find((data: any) => data.workbook_id === item.id);
-    console.log("userPath", userPath);
-    let isExists = false;
+    let isAllExists = false;
     for(const pdf of userPath.pdf){
       const isExists = await osIsFileExists(pdf.user_file_path);
       if(isExists){
-        isExists = true;
+        isAllExists = true;
         break;
       }
     }
     for(const audio of userPath.audio){
       const isExists = await osIsFileExists(audio.user_file_path); 
-      console.log("isExists", isExists);
       if(isExists){
-        isExists = true;
+        isAllExists = true;
         break;
       }
     }
-
+    if(!isAllExists){
+      // 파일 타입에 맞게 파일 경로 등록 모달 표현
+      if(item.type === 'workbook'){
+        const ebooks = getAllEbooks();
+        const ebook = ebooks.find((ebook: any) => ebook.id === item.id);
+        pushModal(
+          SetWorkBookModal as unknown as React.ComponentType<Record<string, unknown>>, 
+          {item: ebook} as unknown as Record<string, unknown>, 
+          { 
+            preserveState: true, 
+            keepInDOM: true,
+            smFull: true
+          }
+        );
+      }
+      if(item.type === 'mybook'){
+        pushModal(SetMyBookModal, {item: item}, { 
+          preserveState: true, 
+          keepInDOM: true,
+          smFull: true
+        });
+      }
+      return;
+    }
     if(item.type === 'workbook'){
       window.location.href = `/learning?testType=WORK_BOOK&workbook_id=${item.id}`;
     }
